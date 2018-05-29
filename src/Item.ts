@@ -32,7 +32,7 @@ class Item extends Laya.Sprite
     //随机物品的上下位置
     public randomItemPosition(item): Item
     {
-        var randomNumber = Laya.stage.height * Math.random();
+        var randomNumber = Laya.stage.height / 2 * Math.random();
 
         if(randomNumber <= 50)
         {
@@ -40,7 +40,7 @@ class Item extends Laya.Sprite
         }
         else
         {
-            item.y = FLOOR_HEIGHT + randomNumber;
+            item.y = randomNumber;
             //水平倾斜角度，默认值为0。以角度为单位
             //item.skewX = 180;
             //垂直倾斜角度，默认值为0。以角度为单位。
@@ -60,18 +60,24 @@ class Item extends Laya.Sprite
         switch (type) 
         {
             case Item.ITEM_TYPE_JIASU:
-            this.icon.loadImage("res/jiasu.png");
+                this.icon.loadImage("res/jiasu.png");
+                this.icon.scaleX = 1/6;
+                this.icon.scaleY = 1/5;
             break;
 
             case Item.ITEM_TYPE_JINBI:
                 this.icon.loadImage("res/jinbi.png");
-                break;
+                this.icon.scaleX = this.icon.scaleY = 2/3;
+            break;
+
             case Item.ITEM_TYPE_ZIDAN:
                 this.icon.loadImage("res/zidan.png");
-                break;
+                this.icon.scaleX = this.icon.scaleY = 1/3;
+            break;
+
             default:
                 alert("道具指令错误!");
-                break;
+            break;
         }
         
         this.addChild(this.icon);

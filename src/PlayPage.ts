@@ -182,7 +182,7 @@ class PlayPage extends Sprite
 		
     private initWorld(): void
     {
-        this._gun_left = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 300, 92, 271, { 
+        this._gun_left = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 500, 92, 271, { 
             isStatic: false,
             frictionAir: 0.03,  //空气摩擦力
             //density: 0.68, //密度
@@ -207,7 +207,7 @@ class PlayPage extends Sprite
             collisionFilter: {group: false}
         });
 
-        this._gun_right = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 300, 92, 271, { 
+        this._gun_right = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 500, 92, 271, { 
             isStatic: true,
             frictionAir: 0.03,  //空气摩擦力
             //density: 0.68, //密度
@@ -318,6 +318,8 @@ class PlayPage extends Sprite
 
     private onDestroy(): void
     {
+        return;
+
         Laya.timer.clear(this, this.onHeartBeat); //删除定时器
 
         if (this._gun) this.Matter.World.remove(this._engine.world, this._gun); //删除枪
@@ -327,6 +329,7 @@ class PlayPage extends Sprite
     
     private onHeartBeat(): void
     {
+        //this._score.asTextField.text = this._bg.y.toString();
         //移动
         //this.onLoop();
 
@@ -388,26 +391,7 @@ class PlayPage extends Sprite
         }
 
 
-        //移动
-        //this.onLoop();
-        //this._background.y += 2;
 
-
-        /*
-        var moveY = Math.abs(this._view.y);
-        
-        //当背景1向左移动出游戏的显示区域 1600，则将背景1的x轴坐标,向右移动 1600*2.
-        if (this.moveX - this.bg1.x >= this.BG_WIDTH) 
-        {
-            this.bg1.x += this.BG_WIDTH * 2;
-        }
-
-        //当背景2向左移动出游戏的显示区域 1600，则将背景2的x轴坐标,向右移动 1600*2.
-        if (this.moveX - this.bg2.x >= this.BG_WIDTH) 
-        {
-            this.bg2.x += this.BG_WIDTH * 2;
-        }
-        */
     }
 
     private createCoins(): void

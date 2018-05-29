@@ -21,21 +21,23 @@ class BackGround extends Laya.Sprite
     //背景的帧处理间隔
     private BG_FRAME_DELAY = 1;
 
-    private itemList: any; //屏幕物品列表
+    private itemBack1: any; //屏幕物品列表
+    private itemBack2: any; //屏幕物品列表
 
     public constructor() 
     {
         super();
 
-        this.itemList = [];
+        this.itemBack1 = [];
+        this.itemBack2 = [];
 
         this.init();
     }
 
     private init(): void
     {
-        Laya.SoundManager.musicVolume = this.BG_MUSIC_VOLUME;
-        Laya.SoundManager.playMusic("res/wav/BG.wav",0);
+        //Laya.SoundManager.musicVolume = this.BG_MUSIC_VOLUME;
+        //Laya.SoundManager.playMusic("res/wav/BG.wav",0);
 
         //创建背景1
         this.bg1 = new Sprite().loadImage("res/BackGround1.png");
@@ -62,7 +64,14 @@ class BackGround extends Laya.Sprite
         if (this.bg1.y + this.y >= this.BG_HEIGHT) 
         {
             this.bg1.y -= this.BG_HEIGHT * 2 ;
+            this.bg1.removeChild();
 
+            for (var i = 0; i < this.itemBack1.length; ++i)
+            {
+                var element = this.itemBack1[i];
+                this.removeChild(element);
+            }
+            
             this.addItem("bg1");
         }
 
@@ -70,33 +79,42 @@ class BackGround extends Laya.Sprite
         if (this.bg2.y + this.y >= this.BG_HEIGHT) 
         {
             this.bg2.y -= this.BG_HEIGHT * 2;
+            this.bg2.removeChild();
+
+            for (var i = 0; i < this.itemBack2.length; ++i)
+            {
+                var element = this.itemBack2[i];
+                this.removeChild(element);
+            }
 
             this.addItem("bg2");
         }
-        
-        this.itemList.forEach(element => {
+
+        /*
+        for (var i = 0; i < this.itemList.length; ++i)
+        {
+            var element = this.itemList[i];
+
             if (element.y + this.y >= this.BG_HEIGHT)
             {
+                console.log("移动子物体:" + element.y + " 当前背景位置:" + this.y);
+                //this.removeChild(element); //删除
                 element.y -= this.BG_HEIGHT * 2;
             }
-        });
+        }
+        */
     }
 
-     /**
-     * 允许在地板上添加物品
-     */
     private addItem(des): void
     {
-        console.log("创建物品...." + des);
-        
         //创建一个随机数
         var randomNumber = Math.random() * 10;
         
         //如果随机数小于五,不添加,因为会造成道具太多的问题
-        if(randomNumber < 1) return;
+        //if(randomNumber < 1) return;
 
         //需要添加的数量
-        var addNum = 0;
+        var addNum = 3;
 
         //计算道具的最大数量,现在强制道具的宽度都是32
         var maxItemNum = Math.floor(FLOOR_WIDTH / 32);
@@ -110,66 +128,49 @@ class BackGround extends Laya.Sprite
         {
             addNum = maxItemNum;
         }
-
+        
         //计算居中的点
         var sx = Laya.stage.width / addNum;
         var arr = [];
-        var isHasSpecialItem = false;
 
         for (var i = 0; i < addNum; i++)
         {
             //每隔两个创建一个,物品分开一点
-            if (i % ITEMNUM_ON_FLOOR == 0) { continue; }
+            if (i % 2 == 0) { continue; }
 
             randomNumber = Math.random();
 
-            //查询当前物品列表里面是否有，如果有的话，就从里面拿取
-            if(this.itemList.length > 0 )
+            var item = new Item(); 
+
+            if (randomNumber >= 1 - 0.2)
             {
-                item = this.itemList.shift(); //shift() 方法用于把数组的第一个元素从其中删除，并返回第一个元素的值。
-                item.visible = true;
-            }
-            else
-            {
-                var item = new Item(); 
-            }
-            
-            if (randomNumber >= 1 - ITEM_INVINCIBLE_PROBABILITY)
-            {
-                isHasSpecialItem = true;
                 item.init(Item.ITEM_TYPE_JIASU); //加速
             }
-            else if (randomNumber >= 1-ITEM_DECELERAYION_PROBABILITY)
+            else if (randomNumber >= 1 - 0.5)
             {
-                isHasSpecialItem = true;
+                item.init(Item.ITEM_TYPE_ZIDAN); //子弹
+            }
+            else if (randomNumber >= 1 - 0.8)
+            {
                 item.init(Item.ITEM_TYPE_JINBI); //金币
             }
-            else if (randomNumber >= 1-ITEM_STAR_PROBABILITY)
-            {
-                isHasSpecialItem = true;
-                item.init(Item.ITEM_TYPE_ZIDAN);  //子弹
-            }
 
-            if (!item) return;
+            var y = this.bg1.y;
+            if (des == "bg2") y = this.bg2.y;
 
-            item.y -= this.BG_HEIGHT / 2;
             item.x = (sx + i * 32);
             item.zOrder = 1;
-            
-            item = item.randomItemPosition(item);   //已经设置好了y值
-            
+
+            item.y = y + Laya.stage.height / 2 * Math.random();
+
+            console.log("为背景:" + des + "添加物品信息，x:" + item.x + " y:" + item.y + " this.y " + this.y);
+            console.log("addNum " + addNum + " randomNumber" + randomNumber);
+
             this.addChild(item);
             arr.push(item);
         }
 
-        this.itemList = [].concat(arr)
-    }
-
-    /**
-     * 获取当前当前地板上的所有物品
-     */
-    private getAllItems(): void
-    {
-        return this.itemList;
+        if (des == "bg1") this.itemBack1 =  [].concat(arr);
+        else this.itemBack2 = [].concat(arr);
     }
 }
