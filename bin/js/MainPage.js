@@ -17,6 +17,8 @@ var MainPge = /** @class */ (function () {
         this._gunIndex = 0;
         this._view.visible = false; //隐藏当前界面
         this._playPage = new PlayPage();
+        this._playPage.zOrder = -10;
+        Laya.stage.addChild(this._playPage);
     };
     return MainPge;
 }());
