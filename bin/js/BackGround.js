@@ -151,19 +151,19 @@ var BackGround = /** @class */ (function (_super) {
         }
         */
         var list = ItemNormal.list.content;
+        var index = Math.floor(list.length * Math.random());
         var y = this.bg1.y;
         if (des == "bg2")
             y = this.bg2.y;
-        list.forEach(function (array) {
-            array.forEach(function (element) {
-                var item = new Item();
-                item.init(element.type);
-                item.zOrder = 1;
-                item.x = element.x;
-                item.y = y + element.y;
-                _this.addChild(item);
-                arr.push(item);
-            });
+        var array = list[index];
+        array.forEach(function (element) {
+            var item = new Item();
+            item.init(element.type);
+            item.zOrder = 1;
+            item.x = element.x;
+            item.y = y + element.y;
+            _this.addChild(item);
+            arr.push(item);
         });
         if (des == "bg1") {
             this.itemBack1 = [].concat(arr);
