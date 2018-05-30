@@ -1,10 +1,6 @@
 class Item extends Laya.Sprite
 {
     private icon: any;
-    private starTexture: any;
-    private decelerationTexure: any;
-    private invincibleTexture: any;
-
     public _itemList: any;
     
     //金币
@@ -70,6 +66,5 @@ class Item extends Laya.Sprite
             this.addChild(icon);
         }
     }
-
     
 }
