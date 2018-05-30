@@ -83,6 +83,7 @@ var PlayPage = /** @class */ (function (_super) {
         this.Matter.Body.setAngularVelocity(this._gun, rotateValue);
         //var bulletList: fairygui.GList = this._bullet.asList;
         //bulletList.removeChildAt(bulletList.numItems - 1); //删除子弹
+        //this._bg.y += 100;
     };
     PlayPage.prototype.init = function () {
         console.log("开始游戏...");
@@ -114,7 +115,7 @@ var PlayPage = /** @class */ (function (_super) {
         this.LayaRender.run(render);
     };
     PlayPage.prototype.initWorld = function () {
-        this._gun_left = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 300, 92, 271, {
+        this._gun_left = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 500, 92, 271, {
             isStatic: false,
             frictionAir: 0.03,
             //density: 0.68, //密度
@@ -137,7 +138,7 @@ var PlayPage = /** @class */ (function (_super) {
             },
             collisionFilter: { group: false }
         });
-        this._gun_right = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 300, 92, 271, {
+        this._gun_right = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 500, 92, 271, {
             isStatic: true,
             frictionAir: 0.03,
             //density: 0.68, //密度
@@ -161,6 +162,10 @@ var PlayPage = /** @class */ (function (_super) {
             collisionFilter: { group: false }
         });
         this.Matter.World.add(this._engine.world, [this._gun_left, this._gun_right,
+            this.Matter.Bodies.rectangle(0, Laya.stage.height + 100, Laya.stage.width * 2, 1, {
+                isStatic: true,
+                label: "gameover"
+            }),
         ]);
         this.Matter.Events.on(this._engine, 'collisionActive', this.onCollision);
     };
@@ -216,6 +221,7 @@ var PlayPage = /** @class */ (function (_super) {
         return false;
     };
     PlayPage.prototype.onDestroy = function () {
+        return;
         Laya.timer.clear(this, this.onHeartBeat); //删除定时器
         if (this._gun)
             this.Matter.World.remove(this._engine.world, this._gun); //删除枪
@@ -225,6 +231,7 @@ var PlayPage = /** @class */ (function (_super) {
             this.Matter.World.remove(this._engine.world, this._gun_right); //删除枪
     };
     PlayPage.prototype.onHeartBeat = function () {
+        //this._score.asTextField.text = this._bg.y.toString();
         //移动
         //this.onLoop();
         //this._gun_rotater.visible = true;
@@ -266,24 +273,6 @@ var PlayPage = /** @class */ (function (_super) {
             this._gun_right.visible = false;
             */
         }
-        //移动
-        //this.onLoop();
-        //this._background.y += 2;
-        /*
-        var moveY = Math.abs(this._view.y);
-        
-        //当背景1向左移动出游戏的显示区域 1600，则将背景1的x轴坐标,向右移动 1600*2.
-        if (this.moveX - this.bg1.x >= this.BG_WIDTH)
-        {
-            this.bg1.x += this.BG_WIDTH * 2;
-        }
-
-        //当背景2向左移动出游戏的显示区域 1600，则将背景2的x轴坐标,向右移动 1600*2.
-        if (this.moveX - this.bg2.x >= this.BG_WIDTH)
-        {
-            this.bg2.x += this.BG_WIDTH * 2;
-        }
-        */
     };
     PlayPage.prototype.createCoins = function () {
         for (var i = 0; i < 10; ++i) {

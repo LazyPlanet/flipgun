@@ -134,6 +134,8 @@ class PlayPage extends Sprite
 
         //var bulletList: fairygui.GList = this._bullet.asList;
         //bulletList.removeChildAt(bulletList.numItems - 1); //删除子弹
+
+        //this._bg.y += 100;
     }
 
     private init(): void
@@ -233,12 +235,10 @@ class PlayPage extends Sprite
         });
 
         this.Matter.World.add(this._engine.world, [this._gun_left, this._gun_right, //枪
-        /*
             this.Matter.Bodies.rectangle(0, Laya.stage.height + 100, Laya.stage.width * 2, 1, { 
                 isStatic: true, 
                 label: "gameover"
              }), //触底失败
-             */
         ]);
 
         this.Matter.Events.on(this._engine, 'collisionActive', this.onCollision);

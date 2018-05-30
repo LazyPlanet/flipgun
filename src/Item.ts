@@ -1,21 +1,26 @@
 class Item extends Laya.Sprite
 {
-    private type: string;
     private icon: any;
     private starTexture: any;
     private decelerationTexure: any;
     private invincibleTexture: any;
 
-    //加速
-    static ITEM_TYPE_JIASU = "ITEM_TYPE_JIASU";
+    public _itemList: any;
+    
     //金币
-    static ITEM_TYPE_JINBI = "ITEM_TYPE_JINBI";
-    //无敌
-    static ITEM_TYPE_ZIDAN = "ITEM_TYPE_INVINCIBLE";
+    static ITEM_TYPE_JINBI = 1;
+    //加速
+    static ITEM_TYPE_JIASU = 2;
+    //子弹
+    static ITEM_TYPE_ZIDAN = 3;
 
+    private _itemTypes: any;
+    
     public constructor() 
     {
         super();
+
+        this._itemList = [];
     }
 
     //播放星星的碰撞效果
@@ -27,60 +32,44 @@ class Item extends Laya.Sprite
     private undefinedFunc(): void
     {
 
-    }
-
-    //随机物品的上下位置
-    public randomItemPosition(item): Item
-    {
-        var randomNumber = Laya.stage.height / 2 * Math.random();
-
-        if(randomNumber <= 50)
-        {
-            item.y = -30;
-        }
-        else
-        {
-            item.y = randomNumber;
-            //水平倾斜角度，默认值为0。以角度为单位
-            //item.skewX = 180;
-            //垂直倾斜角度，默认值为0。以角度为单位。
-            //item.skewY = 180;
-            //镜像翻转
-            //item.scaleX = -1;
-        }
-        
-        return item;
-    }
+    }    
 
     public init(type): void
     {
-        this.type = type;
-        this.icon = new Sprite();
-
-        switch (type) 
+        for (var i = 0; i < 1; ++i)
         {
-            case Item.ITEM_TYPE_JIASU:
-                this.icon.loadImage("res/jiasu.png");
-                this.icon.scaleX = 1/6;
-                this.icon.scaleY = 1/5;
-            break;
+            var icon = new Laya.Sprite();
 
-            case Item.ITEM_TYPE_JINBI:
-                this.icon.loadImage("res/jinbi.png");
-                this.icon.scaleX = this.icon.scaleY = 2/3;
-            break;
+            switch (type) 
+            {
+                case Item.ITEM_TYPE_JIASU:
+                    icon.loadImage("res/jiasu.png");
+                    icon.scaleX = 1/6;
+                    icon.scaleY = 1/5;
+                break;
 
-            case Item.ITEM_TYPE_ZIDAN:
-                this.icon.loadImage("res/zidan.png");
-                this.icon.scaleX = this.icon.scaleY = 1/3;
-            break;
+                case Item.ITEM_TYPE_JINBI:
+                    icon.loadImage("res/jinbi.png");
+                    icon.scaleX = icon.scaleY = 2/3;
+                break;
 
-            default:
-                alert("道具指令错误!");
-            break;
-        }
+                case Item.ITEM_TYPE_ZIDAN:
+                    icon.loadImage("res/zidan.png");
+                    icon.scaleX = icon.scaleY = 1/3;
+                break;
+
+                default:
+                    alert("道具指令错误!");
+                break;
+            }
         
-        this.addChild(this.icon);
+            icon.x = icon.x + 80 * i + 80;
+
+            this._itemList.push(icon);
+
+            this.addChild(icon);
+        }
     }
+
     
 }

@@ -107,6 +107,9 @@ class BackGround extends Laya.Sprite
 
     private addItem(des): void
     {
+        var arr = [];
+
+        /*
         //创建一个随机数
         var randomNumber = Math.random() * 10;
         
@@ -117,10 +120,10 @@ class BackGround extends Laya.Sprite
         var addNum = 3;
 
         //计算道具的最大数量,现在强制道具的宽度都是32
-        var maxItemNum = Math.floor(FLOOR_WIDTH / 32);
+        var maxItemNum = Math.floor(Laya.stage.width / 40);
 
         //定制数量的规则
-        if(maxItemNum >= 5)
+        if(maxItemNum >= 8)
         {
             addNum = 5 + Math.floor((maxItemNum - 5) * Math.random());;
         }
@@ -131,46 +134,69 @@ class BackGround extends Laya.Sprite
         
         //计算居中的点
         var sx = Laya.stage.width / addNum;
+        var sy = Laya.stage.height / addNum;
+
         var arr = [];
 
         for (var i = 0; i < addNum; i++)
         {
-            //每隔两个创建一个,物品分开一点
-            if (i % 2 == 0) { continue; }
+            //if (i % 2 == 0) { continue; }
 
             randomNumber = Math.random();
 
             var item = new Item(); 
 
-            if (randomNumber >= 1 - 0.2)
+            if (randomNumber >= 1 - 0.08)
             {
                 item.init(Item.ITEM_TYPE_JIASU); //加速
             }
-            else if (randomNumber >= 1 - 0.5)
+            else if (randomNumber >= 1 - 0.1)
             {
                 item.init(Item.ITEM_TYPE_ZIDAN); //子弹
             }
-            else if (randomNumber >= 1 - 0.8)
+            else if (randomNumber >= 1 - 0.82)
             {
                 item.init(Item.ITEM_TYPE_JINBI); //金币
+                item.scaleX = -1;
             }
 
             var y = this.bg1.y;
             if (des == "bg2") y = this.bg2.y;
 
-            item.x = (sx + i * 32);
+            item.x = (sx + i * 60);
+            item.y = y + i * sy;
             item.zOrder = 1;
+            
+            //item.y = y + i * 50; //Laya.stage.height / 2 * Math.random();
 
-            item.y = y + Laya.stage.height / 2 * Math.random();
-
-            console.log("为背景:" + des + "添加物品信息，x:" + item.x + " y:" + item.y + " this.y " + this.y);
-            console.log("addNum " + addNum + " randomNumber" + randomNumber);
+            //console.log("为背景:" + des + "添加物品信息，x:" + item.x + " y:" + item.y + " this.y " + this.y);
+            //console.log("addNum " + addNum + " randomNumber" + randomNumber);
 
             this.addChild(item);
             arr.push(item);
         }
+        */
 
-        if (des == "bg1") this.itemBack1 =  [].concat(arr);
-        else this.itemBack2 = [].concat(arr);
+        var list = ItemNormal.list.content;
+
+        var y = this.bg1.y;
+        if (des == "bg2") y = this.bg2.y;
+
+        list.forEach(array => {
+            array.forEach(element => {
+                var item = new Item(); 
+                item.init(element.type);
+                item.zOrder = 1;
+
+                item.x = element.x;
+                item.y = y + element.y;
+
+                this.addChild(item);
+                arr.push(item); 
+            });
+        });
+
+        if (des == "bg1") { this.itemBack1 =  [].concat(arr); }
+        else { this.itemBack2 = [].concat(arr); }
     }
 }

@@ -5,11 +5,9 @@ var MainPge = /** @class */ (function () {
         this._view.setSize(fairygui.GRoot.inst.width, fairygui.GRoot.inst.height);
         fairygui.GRoot.inst.addChild(this._view);
         this._playBtn = this._view.getChild("PlayButton"); //开始按钮
-        this._playBtn.asButton.titleColor = "#1BBB2E";
         this._playBtn.onClick(this, this.onPlay);
         this._bestScore = this._view.getChild("BestScoreNum"); //最高分数
         this._circleBg = this._view.getChild("n32");
-        //this._circleBg.asImage.color = "#151515";
         this._gunName = this._view.getChild("GunName");
         this._gunName.text = "大枪";
     }
