@@ -110,8 +110,6 @@ class PlayPage extends Sprite
             angle = 0.5 * angle / Math.PI;
         }
 
-        //console.log("玩家点击屏幕，点击次数:" + this._clickCount + " " + this._gun.mass); 
-
         var force = 0.08 * this._gun.mass;
         var x0 = force * Math.sin(angle) / 12;
         var y0 = force * Math.cos(angle);
@@ -123,19 +121,10 @@ class PlayPage extends Sprite
         var rotateValue = Math.PI / 15;
         if (Math.PI < angle && angle < 2 * Math.PI) rotateValue *= -1;
 
-/*
-        console.log("x:" + x0);
-        console.log("y:" + y0);
-        console.log("angle:" + angle);
-        console.log("rotateValue:" + rotateValue);
-        */
-
         this.Matter.Body.setAngularVelocity(this._gun, rotateValue);
 
         //var bulletList: fairygui.GList = this._bullet.asList;
         //bulletList.removeChildAt(bulletList.numItems - 1); //删除子弹
-
-        //this._bg.y += 100;
     }
 
     private init(): void

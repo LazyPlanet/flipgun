@@ -10,12 +10,11 @@ class GameMain
     {
         Laya.init(750, 1334, Laya.WebGL);
         laya.utils.Stat.show(0, 0);
+
         //设置适配模式
         Laya.stage.scaleMode = "showall";
         Laya.stage.alignH = "left";
         Laya.stage.alignV = "top";
-        //设置横竖屏
-        //Laya.stage.screenMode = "horizontal";
         
         Laya.loader.load([
         { url: "res/GunUI@atlas0.png", type: Loader.IMAGE },
@@ -36,6 +35,7 @@ class GameMain
 
 //初始化微信小游戏
 Laya.MiniAdpter.init();
+
 //开始主程序
 var _gamePage = new GameMain();
 
