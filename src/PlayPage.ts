@@ -36,6 +36,7 @@ class PlayPage extends Sprite
 
     private _heartCount: number;
     private _coinNum: number;
+    private _bulletNum: number;
 
     private bg1: any;
     private bg2: any;
@@ -82,6 +83,7 @@ class PlayPage extends Sprite
         
         this._heartCount = 0;
         this._coinNum = 0;
+        this._bulletNum = 0;
 
         this.init();
 
@@ -148,12 +150,21 @@ class PlayPage extends Sprite
     {
         this._coinNum = this._coinNum + count;
         this._coins.asTextField.text = this._coinNum.toString();
+
+        console.log("增加金币，当前金币数量:" + this._coinNum);
     }
 
     private gainBullet(count: number)
     {
-        //var currCount = parseInt(this._coins.asTextField.text);
-        //this._coins.asTextField.text = (count + currCount).toString();
+        this._bulletNum = this._bulletNum + count;
+        this._bullet.asTextField.text = this._bulletNum.toString();
+
+        console.log("增加金币，当前数量:" + this._bulletNum);
+    }
+
+    public getHoster(): any
+    {
+        return this._gun;
     }
 
     private initMatter(): void
@@ -173,7 +184,7 @@ class PlayPage extends Sprite
 		
     private initWorld(): void
     {
-        this._gun_left = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 500, 92, 271, { 
+        this._gun = this._gun_left = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 500, 92, 271, { 
             isStatic: false,
             frictionAir: 0.03,  //空气摩擦力
             //density: 0.68, //密度
@@ -307,8 +318,6 @@ class PlayPage extends Sprite
 
     private onDestroy(): void
     {
-        return;
-
         Laya.timer.clear(this, this.onHeartBeat); //删除定时器
 
         if (this._gun) this.Matter.World.remove(this._engine.world, this._gun); //删除枪
@@ -318,12 +327,6 @@ class PlayPage extends Sprite
     
     private onHeartBeat(): void
     {
-        //this._score.asTextField.text = this._bg.y.toString();
-        //移动
-        //this.onLoop();
-
-        //this._gun_rotater.visible = true;
-
         if (!this._gun) return;
 
         ++this._heartCount;
@@ -368,19 +371,8 @@ class PlayPage extends Sprite
             this._gun_left.render.visible = true;
             this._gun = this._gun_right;
         }
-        else
-        {
-            /*
-            this._gun_left = this._gun;
-            this._gun_right = this._gun;
-
-            this._gun_left.visible = true;
-            this._gun_right.visible = false;
-            */
-        }
-
-
-
+       
+        this.hitCheck(this._gun.position.x, this._gun.position.y);
     }
 
     private createCoins(): void
@@ -397,45 +389,51 @@ class PlayPage extends Sprite
         }
     }
 
-    private onLoop(): void
+    public hitCheck(playerX, playerY): void
     {
-        if (this.IS_PAUSE || this.IS_OVER) { return; }
+        var itemBack1 = this._bg.itemBack1;
 
-        if (this._heartCount % 21 == 0) this.createCoins();
-
-        //移动
-        this.y -= this.BG_SPEED;
-
-        if (this.bg1.y + this.y <= -this.BG_HEIGHT) 
+        for(var i = 0; i < itemBack1.length; ++i)
         {
-            this.bg1.y += this.BG_HEIGHT * 2;
-        }
+            var element = itemBack1[i];
+            var itemX = element.x;
+            var itemY = element.y;
+            var itemWidth = element.width;
+            var itemHeight = element.height;
 
-        if (this.bg2.y + this.y <= -this.BG_HEIGHT) 
-        {
-            this.bg2.y += this.BG_HEIGHT * 2;
-        }
+            var pY_left = Math.abs(itemY) % Laya.stage.height - itemHeight / 2;
+            var pY_right = Math.abs(itemY) % Laya.stage.height + itemHeight / 2;
+            
+            console.log("检测碰撞物体:" + " playerX:" + playerX + " playerY:" + playerY + " itemX:" + itemX + " itemY:" + itemY + 
+                " itemWidth:" + itemWidth + " itemHeight:" + itemHeight + " pY_left:" + pY_left + " pY_right:" + pY_right);
 
-        if (this.tree.y + this.y <= -this.BG_HEIGHT) 
-        {
-            this.tree.y += this.BG_HEIGHT * 2;
-        }
-        
-        if (this.cat.y + this.y <= -this.BG_HEIGHT) 
-        {
-            this.cat.y += this.BG_HEIGHT * 2;
+            if (playerX < itemX - itemWidth / 2 || playerX > itemX + itemWidth / 2 || playerY < pY_left || playerY > pY_right)
+            {
+                continue;
+            }
+
+            var itemType = element.getType();
+
+            switch(itemType){
+                case Item.ITEM_TYPE_JIASU: //加速
+                break;
+
+                case Item.ITEM_TYPE_JINBI: //金币
+                this.gainCoin(1);
+                break;
+
+                case Item.ITEM_TYPE_ZIDAN: //子弹
+                this.gainBullet(1);
+                break;
+
+                default:
+                    alert("错误物品!");
+                break;
+            }
+
+            this.removeChild(element);
+            console.log("删除碰撞物体");
         }
     }
 
-    private checkHit(playerX, playerY): boolean
-    {
-        /*
-            玩家在上方:
-                玩家的Y轴 < (地板Y+FLOOR_HEIGHT)
-                玩家Y > 地板Y
-        */
-        if (playerY > this.y && playerY < (this.y + FLOOR_HEIGHT)) return true;
-
-        return false;
-    }
 }

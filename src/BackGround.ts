@@ -21,8 +21,8 @@ class BackGround extends Laya.Sprite
     //背景的帧处理间隔
     private BG_FRAME_DELAY = 1;
 
-    private itemBack1: any; //屏幕物品列表
-    private itemBack2: any; //屏幕物品列表
+    public itemBack1: any; //屏幕物品列表
+    public itemBack2: any; //屏幕物品列表
 
     public constructor() 
     {
@@ -117,4 +117,5 @@ class BackGround extends Laya.Sprite
         if (des == "bg1") { this.itemBack1 =  [].concat(arr); }
         else { this.itemBack2 = [].concat(arr); }
     }
-}
+
+} //class BackGround
