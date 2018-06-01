@@ -318,8 +318,6 @@ class PlayPage extends Sprite
 
     private onDestroy(): void
     {
-        return;
-
         Laya.timer.clear(this, this.onHeartBeat); //删除定时器
 
         if (this._gun) this.Matter.World.remove(this._engine.world, this._gun); //删除枪
@@ -418,6 +416,7 @@ class PlayPage extends Sprite
 
             switch(itemType){
                 case Item.ITEM_TYPE_JIASU: //加速
+                this._gun.position.y += 10;
                 break;
 
                 case Item.ITEM_TYPE_JINBI: //金币

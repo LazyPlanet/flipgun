@@ -101,7 +101,7 @@ class BackGround extends Laya.Sprite
         var y = this.bg1.y;
         if (des == "bg2") y = this.bg2.y;
 
-        var list = ItemNormal.list.content; //读取策划配置物品，随机显示
+        var list = ItemNormal.list.levels; //读取策划配置物品，随机显示
         var index = Math.floor(list.length * Math.random());
         
         var array = list[index];
