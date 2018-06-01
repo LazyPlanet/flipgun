@@ -98,6 +98,8 @@ class PlayPage extends Sprite
             console.warn("游戏已经结束，不能再次点击.");
             return; //游戏已经结束
         }
+
+        this.Matter.Body.setAngularVelocity(this._gun, 0);
         
         if (!this._gun) this._gun = this._gun_left; //初始化
         
@@ -107,9 +109,12 @@ class PlayPage extends Sprite
       
         var angle = this._gun.angle;
 
+        console.log("角度:" + angle);
+
         if (angle > 2 * Math.PI)
         {
-            angle = 0.5 * angle / Math.PI;
+            var num = Math.floor(0.5 * angle / Math.PI);
+            angle -= (num * 2 * Math.PI);
         }
 
         var force = 0.08 * this._gun.mass;
@@ -122,6 +127,8 @@ class PlayPage extends Sprite
 
         var rotateValue = Math.PI / 15;
         if (Math.PI < angle && angle < 2 * Math.PI) rotateValue *= -1;
+
+        console.log("枪当前参数：" + "angle:" + angle + " this._gun.position:" + this._gun.position.x + " " + this._gun.position.y + " x0:" + x0 + " y0:" + y0 + " 力大小和角度:" + force + " " + rotateValue);
 
         this.Matter.Body.setAngularVelocity(this._gun, rotateValue);
 
@@ -416,15 +423,25 @@ class PlayPage extends Sprite
 
             switch(itemType){
                 case Item.ITEM_TYPE_JIASU: //加速
-                this._gun.position.y += 10;
+                {
+                    this._gun.position.y += 10;
+                }
                 break;
 
                 case Item.ITEM_TYPE_JINBI: //金币
-                this.gainCoin(1);
+                {
+                    element.visible = false;
+                    this._bg.removeChild(element);
+                    this.gainCoin(1);
+                }
                 break;
 
                 case Item.ITEM_TYPE_ZIDAN: //子弹
-                this.gainBullet(1);
+                {
+                    element.visible = false;
+                    this._bg.removeChild(element);
+                    this.gainBullet(1);
+                }
                 break;
 
                 default:
@@ -432,8 +449,6 @@ class PlayPage extends Sprite
                 break;
             }
             
-            element.visible = false;
-            this._bg.removeChild(element);
 
             console.log("删除碰撞物体");
         }
