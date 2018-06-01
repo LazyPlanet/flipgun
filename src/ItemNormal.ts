@@ -15,6 +15,7 @@ type:
 public static list = { "content": [
 
 //坐标点
+
 [
 	{ "type" : 1, "x" : 162, "y" : 113 },
 	{ "type" : 1, "x" : 163, "y" : 274 },
@@ -548,7 +549,7 @@ public static list = { "content": [
 
 
 [
-	//{ "type" : 1, "x" : 100, "y" : 100 },
+	//{ "type" : 1, "x" : 200, "y" : 300 },
 	//{ "type" : 1, "x" : 100, "y" : 120 }
 ]
 

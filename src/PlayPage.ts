@@ -318,6 +318,8 @@ class PlayPage extends Sprite
 
     private onDestroy(): void
     {
+        return;
+
         Laya.timer.clear(this, this.onHeartBeat); //删除定时器
 
         if (this._gun) this.Matter.World.remove(this._engine.world, this._gun); //删除枪
@@ -327,11 +329,9 @@ class PlayPage extends Sprite
     
     private onHeartBeat(): void
     {
-        if (!this._gun) return;
+        //if (!this._gun) return;
 
         ++this._heartCount;
-
-        //if (this._heartCount % 200 == 0) this.createCoins();
 
         var gun_x = this._gun.position.x;
         var gun_y = this._gun.position.y;
@@ -342,6 +342,7 @@ class PlayPage extends Sprite
 
         //console.log("gun_x: " + gun_x);
 
+        /*
         var bijiao = 0;
 
         if (gun_x < Laya.stage.width) //屏幕左侧
@@ -371,41 +372,42 @@ class PlayPage extends Sprite
             this._gun_left.render.visible = true;
             this._gun = this._gun_right;
         }
-       
-        this.hitCheck(this._gun.position.x, this._gun.position.y);
+        */
+
+        this.hitCheck(this._gun);
     }
 
-    private createCoins(): void
-    {
-        for (var i = 0; i < 10; ++i)
-        {
-            var x = Math.random() * Laya.stage.width;
-            var y = Math.random() * Laya.stage.height;
-
-            var coin = new Sprite().loadImage("res/coin.png");
-            coin.x = x;
-            coin.y = -y;
-            this.addChild(coin);
-        }
-    }
-
-    public hitCheck(playerX, playerY): void
+    public hitCheck(player): void
     {
         var itemBack1 = this._bg.itemBack1;
 
         for(var i = 0; i < itemBack1.length; ++i)
         {
+            var playerX = player.position.x;
+            var playerY = player.position.y;
+
             var element = itemBack1[i];
-            var itemX = element.x;
-            var itemY = element.y;
+            if (!element.visible) continue;
+
+            var itemX = element.x + this._bg.x;
+            var itemY = element.y + this._bg.y;
             var itemWidth = element.width;
             var itemHeight = element.height;
 
-            var pY_left = Math.abs(itemY) % Laya.stage.height - itemHeight / 2;
-            var pY_right = Math.abs(itemY) % Laya.stage.height + itemHeight / 2;
-            
-            console.log("检测碰撞物体:" + " playerX:" + playerX + " playerY:" + playerY + " itemX:" + itemX + " itemY:" + itemY + 
-                " itemWidth:" + itemWidth + " itemHeight:" + itemHeight + " pY_left:" + pY_left + " pY_right:" + pY_right);
+            var pY_left = itemY % Laya.stage.height - itemHeight / 2;
+            var pY_right = itemY % Laya.stage.height + itemHeight / 2;
+            /*
+            console.log("检测碰撞物体:" + " playerX:" + playerX + " playerY:" + playerY + " " + player.render.sprite.width + " " + player.render.sprite.height);
+            console.log("检测碰撞物体: itemX:" + itemX + " itemY:" + itemY + " itemWidth:" + itemWidth + " itemHeight:" + itemHeight + " pY_left:" + pY_left + " pY_right:" + pY_right);
+
+            var bg1 = this._bg.bg1;
+            var bg2 = this._bg.bg2;
+
+            console.log("bg1：" + bg1.x + " " + bg1.y);
+            console.log("bg2：" + bg2.x + " " + bg2.y);
+            console.log("this._bg：" + this._bg.x + " " + this._bg.y);
+            console.log("element：" + element.x + " " + element.y + " " + element.width + " " + element.height);
+            */
 
             if (playerX < itemX - itemWidth / 2 || playerX > itemX + itemWidth / 2 || playerY < pY_left || playerY > pY_right)
             {
@@ -430,8 +432,10 @@ class PlayPage extends Sprite
                     alert("错误物品!");
                 break;
             }
+            
+            element.visible = false;
+            this._bg.removeChild(element);
 
-            this.removeChild(element);
             console.log("删除碰撞物体");
         }
     }

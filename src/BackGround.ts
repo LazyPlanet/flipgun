@@ -1,8 +1,8 @@
 
 class BackGround extends Laya.Sprite
 {
-    private bg1: any;
-    private bg2: any;
+    public bg1: any;
+    public bg2: any;
     //private cat: any;
     //private tree: any;
 
@@ -65,7 +65,7 @@ class BackGround extends Laya.Sprite
         {
             this.bg1.y -= this.BG_HEIGHT * 2 ;
             this.bg1.removeChild();
-
+            
             for (var i = 0; i < this.itemBack1.length; ++i)
             {
                 var element = this.itemBack1[i];
@@ -80,13 +80,13 @@ class BackGround extends Laya.Sprite
         {
             this.bg2.y -= this.BG_HEIGHT * 2;
             this.bg2.removeChild();
-
+            
             for (var i = 0; i < this.itemBack2.length; ++i)
             {
                 var element = this.itemBack2[i];
                 this.removeChild(element);
             }
-
+            
             this.addItem("bg2");
         }
     }
@@ -103,9 +103,19 @@ class BackGround extends Laya.Sprite
 
         var array = list[index];
         array.forEach(element => {
-            var item = new Item(); 
+            
+            var item = this.itemBack1.shift();
+            if (des == "bg2") item = this.itemBack2.shift();
+            
+            if (!item) 
+            {
+                item = new Item(); 
+                console.log(des + ":创建物品，索引:" + index);
+            }
+
             item.init(element.type);
             item.zOrder = 1;
+            item.visible = true;
 
             item.x = element.x;
             item.y = y + element.y;
