@@ -70,7 +70,7 @@ class BackGround extends Laya.Sprite
             for (var i = 0; i < this.itemBack1.length; ++i)
             {
                 var element = this.itemBack1[i];
-                element.visible = false;
+                //element.visible = false;
                 this.removeChild(element);
             }
             
@@ -86,7 +86,7 @@ class BackGround extends Laya.Sprite
             for (var i = 0; i < this.itemBack2.length; ++i)
             {
                 var element = this.itemBack2[i];
-                element.visible = false;
+                //element.visible = false;
                 this.removeChild(element);
             }
             

@@ -99,11 +99,11 @@ class PlayPage extends Sprite
             return; //游戏已经结束
         }
 
-        this.Matter.Body.setAngularVelocity(this._gun, 0);
+        //this.Matter.Body.setAngularVelocity(this._gun, 0);
         
-        if (!this._gun) this._gun = this._gun_left; //初始化
+        //if (!this._gun) this._gun = this._gun_left; //初始化
         
-        this.Matter.Body.setAngularVelocity(this._gun, 0);
+        //this.Matter.Body.setAngularVelocity(this._gun, 0);
 
         ++this._clickCount;
       
@@ -123,12 +123,20 @@ class PlayPage extends Sprite
 
         if (y0 < 0) y0 = 0;
 
+         console.log("枪当前参数1：" + "angle:" + angle + " this._gun.position:" + this._gun.position.x + " " + this._gun.position.y + 
+            //" this._gun_left.position:" + this._gun_left.position.x + " " + this._gun_left.position.y + 
+            " this._gun_right.position:" + this._gun_right.position.x + " " + this._gun_right.position.y +
+            " x0:" + x0 + " y0:" + y0 + " 力大小和角度:" + force + " " + rotateValue);
+
         this.Matter.Body.applyForce(this._gun, this._gun.position, { x: x0, y: -y0 });
 
         var rotateValue = Math.PI / 15;
         if (Math.PI < angle && angle < 2 * Math.PI) rotateValue *= -1;
 
-        console.log("枪当前参数：" + "angle:" + angle + " this._gun.position:" + this._gun.position.x + " " + this._gun.position.y + " x0:" + x0 + " y0:" + y0 + " 力大小和角度:" + force + " " + rotateValue);
+        console.log("枪当前参数：" + "angle:" + angle + " this._gun.position:" + this._gun.position.x + " " + this._gun.position.y + 
+            //" this._gun_left.position:" + this._gun_left.position.x + " " + this._gun_left.position.y + 
+            " this._gun_right.position:" + this._gun_right.position.x + " " + this._gun_right.position.y +
+            " x0:" + x0 + " y0:" + y0 + " 力大小和角度:" + force + " " + rotateValue);
 
         this.Matter.Body.setAngularVelocity(this._gun, rotateValue);
 
@@ -191,7 +199,7 @@ class PlayPage extends Sprite
 		
     private initWorld(): void
     {
-        this._gun = this._gun_left = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 500, 92, 271, { 
+        this._gun = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 500, 92, 271, { 
             isStatic: false,
             frictionAir: 0.03,  //空气摩擦力
             //density: 0.68, //密度
@@ -200,6 +208,8 @@ class PlayPage extends Sprite
             label: "gun",
             mass: 100,
             //angle: Math.PI/2,
+            width: 92,
+            height: 271,
             render: {
                 visible: true, //开启渲染
                 sprite: 
@@ -217,7 +227,7 @@ class PlayPage extends Sprite
         });
 
         this._gun_right = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 500, 92, 271, { 
-            isStatic: true,
+            isStatic: false,
             frictionAir: 0.03,  //空气摩擦力
             //density: 0.68, //密度
             //restitution: 0.8, //弹性
@@ -225,6 +235,8 @@ class PlayPage extends Sprite
             label: "gun",
             mass: 100,
             //angle: Math.PI/2,
+            width: 92,
+            height: 271,
             render: {
                 visible: false, //开启渲染
                 sprite: 
@@ -241,11 +253,13 @@ class PlayPage extends Sprite
             collisionFilter: {group: false}
         });
 
-        this.Matter.World.add(this._engine.world, [this._gun_left, this._gun_right, //枪
-            this.Matter.Bodies.rectangle(0, Laya.stage.height + 100, Laya.stage.width * 2, 1, { 
-                isStatic: true, 
-                label: "gameover"
-             }), //触底失败
+        //this._gun = this._gun_left;
+
+        this.Matter.World.add(this._engine.world, [this._gun, this._gun_right, //枪
+            //this.Matter.Bodies.rectangle(0, Laya.stage.height + 100, Laya.stage.width * 2, 1, { 
+            //    isStatic: true, 
+             //   label: "gameover"
+             //}), //触底失败
         ]);
 
         this.Matter.Events.on(this._engine, 'collisionActive', this.onCollision);
@@ -334,21 +348,28 @@ class PlayPage extends Sprite
     
     private onHeartBeat(): void
     {
-        //if (!this._gun) return;
-
-        ++this._heartCount;
+        ++ this._heartCount;
 
         var gun_x = this._gun.position.x;
         var gun_y = this._gun.position.y;
         var angle = this._gun.angle;
 
-        this._gun_right.position.y = gun_y;
-        this._gun_right.angle = angle;
+        if (this._gun_right.render.visible)
+        {
+            this._gun_right.position.y = gun_y;
+            this._gun_right.angle = angle;
+        }
 
-        //console.log("gun_x: " + gun_x);
+        console.log("心跳参数输出：gun_x:" + gun_x + " this._gun.position:" + this._gun.position.x + " " + this._gun.position.y + " " 
+                + this._gun.render.sprite.x + " " + this._gun.render.sprite.y + " this._gun_right:" + this._gun_right.position.x + " " + this._gun_right.position.y
+                + " " + this._gun_right.width + " " + this._gun_right.height);
 
-        /*
         var bijiao = 0;
+
+        if (gun_x < 0 && gun_x + this._gun.width / 2 < 0)
+        {
+            this.Matter.Body.setPosition(this._gun, this._gun_right.position);
+        }
 
         if (gun_x < Laya.stage.width) //屏幕左侧
         {
@@ -356,28 +377,36 @@ class PlayPage extends Sprite
         }
         else
         {
-            
+            //bijiao = gun_x - this._gun.render.sprite.width;
         }
 
         if (bijiao < 0)
         {
+            this._gun_right.position.y = gun_y;
+            this._gun_right.angle = angle;
+
             this._gun_right.position.x = Laya.stage.width + gun_x;
 
-            //console.log("超过屏幕，调整位置，此时使用右侧枪");
+            console.log("此时使用右侧枪, gun_x:" + gun_x + " this._gun.position:" + this._gun.position.x + " " + this._gun.position.y + " " 
+                + this._gun.render.sprite.x + " " + this._gun.render.sprite.y + " this._gun_right:" + this._gun_right.position.x + " " + this._gun_right.position.y
+                + " " + this._gun_right.width + " " + this._gun_right.height);
 
             this._gun_right.render.visible = true;
-            //this._gun = this._gun_left;
         }
         else if (bijiao > Laya.stage.width)
         {
             this._gun_right.position.x = gun_x - Laya.stage.width;
 
-            //console.log("超过屏幕，调整位置，此时使用左侧枪");
-
-            this._gun_left.render.visible = true;
-            this._gun = this._gun_right;
+            console.log("超过屏幕，调整位置，此时使用左侧枪");
         }
-        */
+
+        if (0 < this._gun.position.x + this._gun.width / 2 && this._gun.position.x < Laya.stage.width - this._gun.width / 2)
+        {
+            this._gun.render.visible = true;
+            this._gun_right.render.visible = false;
+
+            console.log("恢复正常状态");
+        }
 
         this.hitCheck(this._gun);
     }
@@ -424,7 +453,7 @@ class PlayPage extends Sprite
             switch(itemType){
                 case Item.ITEM_TYPE_JIASU: //加速
                 {
-                    this._gun.position.y += 10;
+                    //this._gun.position.y += 10;
                 }
                 break;
 

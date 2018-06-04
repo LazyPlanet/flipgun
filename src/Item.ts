@@ -46,25 +46,31 @@ class Item extends Laya.Sprite
             switch (type) 
             {
                 case Item.ITEM_TYPE_JIASU:
+                {
                     this.loadImage("res/jiasu.png");
                     this.width = 219;
                     this.height = 311;
                     //icon.scaleX = 1/6;
                     //icon.scaleY = 1/5;
+                }
                 break;
 
                 case Item.ITEM_TYPE_JINBI:
+                {
                     this.loadImage("res/jinbi.png");
                     this.width = 80;
                     this.height = 80;
                     //icon.scaleX = icon.scaleY = 2/3;
+                }
                 break;
 
                 case Item.ITEM_TYPE_ZIDAN:
+                {
                     this.loadImage("res/zidan.png");
                     this.width = 70;
                     this.height = 120;
                     //icon.scaleX = icon.scaleY = 1/3;
+                }
                 break;
 
                 default:
