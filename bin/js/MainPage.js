@@ -71,9 +71,8 @@ var MainPge = /** @class */ (function () {
         console.log("选择枪支数据:" + selectedGun.ammo + " " + selectedGun.weight + " " + selectedGun.rate);
     };
     MainPge.prototype.onPlay = function (evt) {
-        this._gunIndex = 0;
         this._view.visible = false; //隐藏当前界面
-        this._playPage = new PlayPage(this._gunIndex);
+        this._playPage = new PlayPage(this._selectedIndex);
         this._playPage.zOrder = -10;
         Laya.stage.addChild(this._playPage);
     };
