@@ -77,6 +77,7 @@ class PlayPage extends Sprite
         this._coinNum = 0; //金币数量
        
         this._selectedGun = ItemNormal.list.guns[gunIndex];
+        if (!this._selectedGun) return;
         this._bulletNum = this._selectedGun.ammo; //子弹数量
         
         this._gameOver = false;
