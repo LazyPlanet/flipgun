@@ -15,7 +15,7 @@ var Browser = Laya.Browser;
 var WebGL = Laya.WebGL;
 var PlayPage = /** @class */ (function (_super) {
     __extends(PlayPage, _super);
-    function PlayPage() {
+    function PlayPage(gunIndex) {
         var _this = _super.call(this) || this;
         _this._clickCount = 0; //玩家点击次数
         _this._gameOver = false; //游戏是否结束
@@ -28,8 +28,6 @@ var PlayPage = /** @class */ (function (_super) {
         //游戏相关状态
         _this.IS_PAUSE = false;
         _this.IS_OVER = false;
-        //背景移动速度
-        _this.BG_SPEED = 3;
         //背景的帧处理间隔
         _this.BG_FRAME_DELAY = 1;
         _this._bg = null;
@@ -43,9 +41,9 @@ var PlayPage = /** @class */ (function (_super) {
         _this._bullet = _this._view.getChild("AmmoList");
         _this._coins = _this._view.getChild("CoinsNum");
         _this._coins.asTextField.text = "" + 0; //初始金币数
-        _this._view.getChild("GunInGame").visible = false;
         _this._heartCount = 0;
         _this._coinNum = 0;
+        _this._bulletNum = 0;
         _this.init();
         _this._bg = new BackGround();
         _this.addChild(_this._bg);
@@ -56,34 +54,25 @@ var PlayPage = /** @class */ (function (_super) {
             console.warn("游戏已经结束，不能再次点击.");
             return; //游戏已经结束
         }
-        if (!this._gun)
-            this._gun = this._gun_left; //初始化
-        this.Matter.Body.setAngularVelocity(this._gun, 0);
         ++this._clickCount;
         var angle = this._gun.angle;
         if (angle > 2 * Math.PI) {
-            angle = 0.5 * angle / Math.PI;
+            var num = Math.floor(0.5 * angle / Math.PI);
+            angle -= (num * 2 * Math.PI);
         }
-        //console.log("玩家点击屏幕，点击次数:" + this._clickCount + " " + this._gun.mass); 
         var force = 0.08 * this._gun.mass;
         var x0 = force * Math.sin(angle) / 12;
         var y0 = force * Math.cos(angle);
         if (y0 < 0)
             y0 = 0;
         this.Matter.Body.applyForce(this._gun, this._gun.position, { x: x0, y: -y0 });
+        //this._bg.y += y0; //背景移动，仿佛枪在上移
         var rotateValue = Math.PI / 15;
         if (Math.PI < angle && angle < 2 * Math.PI)
             rotateValue *= -1;
-        /*
-                console.log("x:" + x0);
-                console.log("y:" + y0);
-                console.log("angle:" + angle);
-                console.log("rotateValue:" + rotateValue);
-                */
         this.Matter.Body.setAngularVelocity(this._gun, rotateValue);
         //var bulletList: fairygui.GList = this._bullet.asList;
         //bulletList.removeChildAt(bulletList.numItems - 1); //删除子弹
-        //this._bg.y += 100;
     };
     PlayPage.prototype.init = function () {
         console.log("开始游戏...");
@@ -98,10 +87,15 @@ var PlayPage = /** @class */ (function (_super) {
     PlayPage.prototype.gainCoin = function (count) {
         this._coinNum = this._coinNum + count;
         this._coins.asTextField.text = this._coinNum.toString();
+        console.log("增加金币，当前金币数量:" + this._coinNum);
     };
     PlayPage.prototype.gainBullet = function (count) {
-        //var currCount = parseInt(this._coins.asTextField.text);
-        //this._coins.asTextField.text = (count + currCount).toString();
+        this._bulletNum = this._bulletNum + count;
+        this._bullet.asTextField.text = this._bulletNum.toString();
+        console.log("增加金币，当前数量:" + this._bulletNum);
+    };
+    PlayPage.prototype.getHoster = function () {
+        return this._gun;
     };
     PlayPage.prototype.initMatter = function () {
         //初始化物理引擎
@@ -115,7 +109,7 @@ var PlayPage = /** @class */ (function (_super) {
         this.LayaRender.run(render);
     };
     PlayPage.prototype.initWorld = function () {
-        this._gun_left = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 500, 92, 271, {
+        this._gun = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 500, 92, 271, {
             isStatic: false,
             frictionAir: 0.03,
             //density: 0.68, //密度
@@ -124,6 +118,8 @@ var PlayPage = /** @class */ (function (_super) {
             label: "gun",
             mass: 100,
             //angle: Math.PI/2,
+            width: 92,
+            height: 271,
             render: {
                 visible: true,
                 sprite: {
@@ -139,7 +135,7 @@ var PlayPage = /** @class */ (function (_super) {
             collisionFilter: { group: false }
         });
         this._gun_right = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 500, 92, 271, {
-            isStatic: true,
+            isStatic: false,
             frictionAir: 0.03,
             //density: 0.68, //密度
             //restitution: 0.8, //弹性
@@ -147,6 +143,8 @@ var PlayPage = /** @class */ (function (_super) {
             label: "gun",
             mass: 100,
             //angle: Math.PI/2,
+            width: 92,
+            height: 271,
             render: {
                 visible: false,
                 sprite: {
@@ -161,48 +159,10 @@ var PlayPage = /** @class */ (function (_super) {
             },
             collisionFilter: { group: false }
         });
-        this.Matter.World.add(this._engine.world, [this._gun_left, this._gun_right,
-            this.Matter.Bodies.rectangle(0, Laya.stage.height + 100, Laya.stage.width * 2, 1, {
-                isStatic: true,
-                label: "gameover"
-            }),
+        //this._gun = this._gun_left;
+        this.Matter.World.add(this._engine.world, [this._gun, this._gun_right,
         ]);
-        this.Matter.Events.on(this._engine, 'collisionActive', this.onCollision);
-    };
-    PlayPage.prototype.onCollision = function (event) {
-        console.log("碰撞了..");
-        var home = _gamePage._mainPage._playPage;
-        for (var i = 0; i < event.pairs.length; i++) {
-            var pair = event.pairs[i];
-            if (!(pair.bodyA.label === 'gun' || pair.bodyB.label == "gun"))
-                continue;
-            var other;
-            if (pair.bodyA.label === 'gun') {
-                other = pair.bodyB;
-            }
-            else {
-                other = pair.bodyA;
-            }
-            switch (other.label) {
-                case "gameover":
-                    {
-                        home.onGameOver();
-                    }
-                    break;
-                case "coin":
-                    {
-                        home.gainCoin(1);
-                    }
-                    break;
-                case "bullet":
-                    {
-                        home.gainBullet(1);
-                    }
-                    break;
-            }
-            console.log("删除物体:", other.label);
-            home.Matter.World.remove(home._engine.world, other);
-        }
+        //this.Matter.Events.on(this._engine, 'collisionActive', this.onCollision);
     };
     PlayPage.prototype.onGameOver = function () {
         if (this._gameOver)
@@ -221,7 +181,6 @@ var PlayPage = /** @class */ (function (_super) {
         return false;
     };
     PlayPage.prototype.onDestroy = function () {
-        return;
         Laya.timer.clear(this, this.onHeartBeat); //删除定时器
         if (this._gun)
             this.Matter.World.remove(this._engine.world, this._gun); //删除枪
@@ -231,89 +190,102 @@ var PlayPage = /** @class */ (function (_super) {
             this.Matter.World.remove(this._engine.world, this._gun_right); //删除枪
     };
     PlayPage.prototype.onHeartBeat = function () {
-        //this._score.asTextField.text = this._bg.y.toString();
-        //移动
-        //this.onLoop();
-        //this._gun_rotater.visible = true;
-        if (!this._gun)
-            return;
         ++this._heartCount;
-        //if (this._heartCount % 200 == 0) this.createCoins();
         var gun_x = this._gun.position.x;
         var gun_y = this._gun.position.y;
         var angle = this._gun.angle;
-        this._gun_right.position.y = gun_y;
-        this._gun_right.angle = angle;
-        //console.log("gun_x: " + gun_x);
-        var bijiao = 0;
-        if (gun_x < Laya.stage.width) //屏幕左侧
-         {
-            bijiao = gun_x - this._gun.render.sprite.width;
+        if (this._gun_right.render.visible) {
+            this._gun_right.position.y = gun_y;
+            this._gun_right.angle = angle;
         }
-        else {
-        }
-        if (bijiao < 0) {
+        //console.log("心跳参数输出:" +  "this._gun.position:" + this._gun.position.x + " " + this._gun.position.y + " " 
+        //        + " this._gun_right:" + this._gun_right.position.x + " " + this._gun_right.position.y);
+        if (-Laya.stage.width + this._gun.width / 2 < gun_x && gun_x < this._gun.width / 2) {
+            this._gun_right.position.y = gun_y;
+            this._gun_right.angle = angle;
             this._gun_right.position.x = Laya.stage.width + gun_x;
-            //console.log("超过屏幕，调整位置，此时使用右侧枪");
+            console.log("此时使用右侧枪");
             this._gun_right.render.visible = true;
-            //this._gun = this._gun_left;
         }
-        else if (bijiao > Laya.stage.width) {
+        else if (gun_x < -Laya.stage.width + this._gun.width / 2) {
+            var position = this._gun_right.position;
+            position.x += Laya.stage.width;
+            this._gun.angle = this._gun_right.angle;
+            this.Matter.Body.setPosition(this._gun, position);
+            this._gun_right.render.visible = false;
+            console.log("移动枪到右侧枪位置，隐藏右侧枪支");
+        }
+        else if (gun_x < Laya.stage.width * 2 - this._gun.width / 2 && gun_x > Laya.stage.width - this._gun.width / 2) {
+            this._gun_right.position.y = gun_y;
+            this._gun_right.angle = angle;
             this._gun_right.position.x = gun_x - Laya.stage.width;
-            //console.log("超过屏幕，调整位置，此时使用左侧枪");
-            this._gun_left.render.visible = true;
-            this._gun = this._gun_right;
+            console.log("超过屏幕，调整位置，此时使用左侧枪");
+            this._gun_right.render.visible = true;
+        }
+        else if (gun_x > Laya.stage.width * 2 - this._gun.width / 2) {
+            var position = this._gun_right.position;
+            position.x -= (Laya.stage.width + this._gun.width / 2);
+            this.Matter.Body.setPosition(this._gun, position);
+            console.log("超过屏幕2倍，调整位置，此时使用左侧枪");
+            this._gun.angle = this._gun_right.angle;
         }
         else {
-            /*
-            this._gun_left = this._gun;
-            this._gun_right = this._gun;
-
-            this._gun_left.visible = true;
-            this._gun_right.visible = false;
-            */
+            this._gun.render.visible = true;
+            this._gun_right.render.visible = false;
+            //console.log("恢复正常状态");
         }
+        this.hitCheck(this._gun);
+        this.hitCheck(this._gun_right);
     };
-    PlayPage.prototype.createCoins = function () {
-        for (var i = 0; i < 10; ++i) {
-            var x = Math.random() * Laya.stage.width;
-            var y = Math.random() * Laya.stage.height;
-            var coin = new Sprite().loadImage("res/coin.png");
-            coin.x = x;
-            coin.y = -y;
-            this.addChild(coin);
-        }
+    PlayPage.prototype.hitCheck = function (player) {
+        this.itemCheck(player, this._bg.itemBack1);
+        this.itemCheck(player, this._bg.itemBack2);
     };
-    PlayPage.prototype.onLoop = function () {
-        if (this.IS_PAUSE || this.IS_OVER) {
-            return;
+    PlayPage.prototype.itemCheck = function (player, itemList) {
+        var itemBack1 = this._bg.itemList;
+        for (var i = 0; i < itemList.length; ++i) {
+            var playerX = player.position.x;
+            var playerY = player.position.y;
+            var element = itemList[i];
+            if (!element.visible)
+                continue;
+            var itemX = element.x + this._bg.x;
+            var itemY = element.y + this._bg.y;
+            var itemWidth = element.width;
+            var itemHeight = element.height;
+            var pY_left = itemY % Laya.stage.height - itemHeight / 2;
+            var pY_right = itemY % Laya.stage.height + itemHeight / 2;
+            if (playerX + this._gun.width / 2 < itemX - itemWidth / 2 || playerX - this._gun.width / 2 > itemX + itemWidth / 2 ||
+                playerY + this._gun.height / 2 < pY_left || playerY - this._gun.height / 2 > pY_right) {
+                continue;
+            }
+            var itemType = element.getType();
+            switch (itemType) {
+                case Item.ITEM_TYPE_JIASU: //加速
+                    {
+                        console.debug("加速.");
+                        this._bg.y += 10;
+                    }
+                    break;
+                case Item.ITEM_TYPE_JINBI: //金币
+                    {
+                        element.visible = false;
+                        this._bg.removeChild(element);
+                        this.gainCoin(1);
+                    }
+                    break;
+                case Item.ITEM_TYPE_ZIDAN: //子弹
+                    {
+                        element.visible = false;
+                        this._bg.removeChild(element);
+                        this.gainBullet(1);
+                    }
+                    break;
+                default:
+                    alert("错误物品!");
+                    break;
+            }
         }
-        if (this._heartCount % 21 == 0)
-            this.createCoins();
-        //移动
-        this.y -= this.BG_SPEED;
-        if (this.bg1.y + this.y <= -this.BG_HEIGHT) {
-            this.bg1.y += this.BG_HEIGHT * 2;
-        }
-        if (this.bg2.y + this.y <= -this.BG_HEIGHT) {
-            this.bg2.y += this.BG_HEIGHT * 2;
-        }
-        if (this.tree.y + this.y <= -this.BG_HEIGHT) {
-            this.tree.y += this.BG_HEIGHT * 2;
-        }
-        if (this.cat.y + this.y <= -this.BG_HEIGHT) {
-            this.cat.y += this.BG_HEIGHT * 2;
-        }
-    };
-    PlayPage.prototype.checkHit = function (playerX, playerY) {
-        /*
-            玩家在上方:
-                玩家的Y轴 < (地板Y+FLOOR_HEIGHT)
-                玩家Y > 地板Y
-        */
-        if (playerY > this.y && playerY < (this.y + FLOOR_HEIGHT))
-            return true;
-        return false;
     };
     return PlayPage;
 }(Sprite));

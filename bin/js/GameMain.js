@@ -9,8 +9,6 @@ var GameMain = /** @class */ (function () {
         Laya.stage.scaleMode = "showall";
         Laya.stage.alignH = "left";
         Laya.stage.alignV = "top";
-        //设置横竖屏
-        //Laya.stage.screenMode = "horizontal";
         Laya.loader.load([
             { url: "res/GunUI@atlas0.png", type: Loader.IMAGE },
             { url: "res/GunUI.fui", type: Loader.BUFFER }
