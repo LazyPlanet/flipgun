@@ -14,29 +14,28 @@ class PlayPage extends Sprite
     private _demoObjects: any;
 
     private _score: fairygui.GObject; //分数
-    private _bullet: fairygui.GObject; //子弹数
+    private _ammoList: fairygui.GObject; //子弹数
     private _coins: fairygui.GObject; //金币
     
     private _gun: any; //fairygui.GObject; //枪
     private _gun_left: any; //fairygui.GObject; //枪
     private _gun_right: any; //fairygui.GObject; //枪
 
-    private _gunTexture: any; //枪图集
-    private _ammoList: any; 
+    private _selectedGun: any; //玩家选择枪的配置数据
 
     private _clickCount = 0; //玩家点击次数
     private _gameOver = false; //游戏是否结束
+    private _paused = false; //游戏是否暂停
 
 	public Matter: any = Browser.window.Matter;
 	public LayaRender: any = Browser.window.LayaRender;
 		
-	//private _background: Laya.Sprite;
-    //private _background: fairygui.GObject; //金币
 	public _engine: any;
 
     private _heartCount: number;
     private _coinNum: number;
     private _bulletNum: number;
+    private _ammoNum: any;
 
     private bg1: any;
     private bg2: any;
@@ -48,10 +47,6 @@ class PlayPage extends Sprite
     private BG_MUSIC_VOLUME = 0.5;
     private BG_WIDTH = 800;
     private BG_HEIGHT = 480;
-
-    //游戏相关状态
-    private IS_PAUSE = false;
-    private IS_OVER = false;
 
     //背景的帧处理间隔
     private BG_FRAME_DELAY = 1;
@@ -72,19 +67,36 @@ class PlayPage extends Sprite
         this._score = this._view.getChild("Score"); 
         this._score.asTextField.text = "" + 0; //初始分数
 
-        this._bullet = this._view.getChild("AmmoList"); 
+        this._ammoList = this._view.getChild("AmmoList"); 
+        this._ammoNum = this._view.getChild("AmmoNum"); 
 
         this._coins = this._view.getChild("CoinsNum"); 
         this._coins.asTextField.text = "" + 0; //初始金币数
 
-        this._heartCount = 0;
-        this._coinNum = 0;
-        this._bulletNum = 0;
+        this._heartCount = 0; //心跳
+        this._coinNum = 0; //金币数量
+       
+        this._selectedGun = ItemNormal.list.guns[gunIndex];
+        this._bulletNum = this._selectedGun.ammo; //子弹数量
+        
+        this._gameOver = false;
 
-        this.init();
+        this.init(); //初始化
+    }
+
+    private init(): void
+    {
+        console.log("开始游戏...");
 
         this._bg = new BackGround();
-        this.addChild(this._bg);
+        this.addChild(this._bg);   
+
+        this.initMatter();
+        this.initWorld();
+
+        this.onUpdate();
+
+        Laya.timer.frameLoop(1, this, this.onHeartBeat); //心跳
     }
     
     private onClick(evt: Event): void 
@@ -120,20 +132,23 @@ class PlayPage extends Sprite
 
         this.Matter.Body.setAngularVelocity(this._gun, rotateValue);
 
-        //var bulletList: fairygui.GList = this._bullet.asList;
-        //bulletList.removeChildAt(bulletList.numItems - 1); //删除子弹
+        --this._bulletNum; //子弹减少
+
+        this.onUpdate(); //更新界面
     }
 
-    private init(): void
+    private onUpdate(): void
     {
-        console.log("开始游戏...");
-        
-        this._gameOver = false;
+        this._ammoNum.text = this._bulletNum.toString();
 
-        this.initMatter();
-        this.initWorld();
+        //设置质量
+        for (var i = 0; i < this._ammoList.asList.numChildren; ++i)
+        {
+            var element = this._ammoList.asList._children[i];
 
-        Laya.timer.frameLoop(1, this, this.onHeartBeat);
+            if (i < this._bulletNum) { element.getController("Empty").selectedIndex = 0; } //白底
+            else { element.getController("Empty").selectedIndex = 1; } //黑底
+        }
     }
 
     private setScore(score: number)
@@ -152,7 +167,7 @@ class PlayPage extends Sprite
     private gainBullet(count: number)
     {
         this._bulletNum = this._bulletNum + count;
-        this._bullet.asTextField.text = this._bulletNum.toString();
+        this._ammoNum.asTextField.text = this._bulletNum.toString();
 
         console.log("增加金币，当前数量:" + this._bulletNum);
     }
@@ -164,8 +179,7 @@ class PlayPage extends Sprite
 
     private initMatter(): void
     {
-        //初始化物理引擎
-		this._engine = this.Matter.Engine.create({ enableSleeping: true });
+		this._engine = this.Matter.Engine.create({ enableSleeping: true }); //初始化物理引擎
 		this.Matter.Engine.run(this._engine);
 			
         //this._engine.world.gravity.y = 1;
@@ -233,25 +247,21 @@ class PlayPage extends Sprite
             collisionFilter: {group: false}
         });
 
-        //this._gun = this._gun_left;
-
-        this.Matter.World.add(this._engine.world, [this._gun, this._gun_right, //枪
-            //this.Matter.Bodies.rectangle(0, Laya.stage.height + 100, Laya.stage.width * 2, 1, { 
-            //    isStatic: true, 
-             //   label: "gameover"
-             //}), //触底失败
-        ]);
-
-        //this.Matter.Events.on(this._engine, 'collisionActive', this.onCollision);
+        this.Matter.World.add(this._engine.world, [this._gun, this._gun_right ]);
     }
 
     private onGameOver(): void
     {
-        if (this._gameOver) return;
+        console.log("结束游戏");
 
-        console.log("结束游戏...");
+        this._view.visible = false; //隐藏当前界面
+        this._bg.visible = false; //隐藏背景图
+
+        var continuePage = new ContinuePage();
+        Laya.stage.addChild(continuePage);
 
         this._gameOver = true;
+        this._bg.onGameOver(); 
 
         this.onDestroy(); //清理定时器
     }
@@ -259,10 +269,8 @@ class PlayPage extends Sprite
     private isOver(): boolean
     {
         if (this._gameOver) return true;
-
-        //游戏子弹检测，没有子弹则结束游戏
-        var bulletList: fairygui.GList = this._bullet.asList;
-        if (bulletList.numItems == 0) return true;
+        
+        if (this._bulletNum <= 0) return true;
 
         return false;
     }
@@ -278,6 +286,12 @@ class PlayPage extends Sprite
     
     private onHeartBeat(): void
     {
+        if (this.isOver())
+        {
+            this.onGameOver();
+            return;
+        }
+        
         ++ this._heartCount;
 
         var gun_x = this._gun.position.x;
@@ -408,17 +422,19 @@ class PlayPage extends Sprite
                     element.visible = false;
                     this._bg.removeChild(element);
 
-                    this.gainBullet(1);
+                    this._bulletNum = this._selectedGun.ammo; //子弹数量加满
+                    this.onUpdate();
                 }
                 break;
 
                 default:
                     alert("错误物品!");
                 break;
-            }
 
-           
-        }
-    }
+            } //switch
 
-}
+        } //for
+
+    } //itemCheck
+
+} //class

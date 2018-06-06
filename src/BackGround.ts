@@ -54,6 +54,11 @@ class BackGround extends Laya.Sprite
         Laya.timer.frameLoop(this.BG_FRAME_DELAY, this, this.onLoop)
     }
 
+    public onGameOver(): void
+    {
+        Laya.timer.clear(this, this.onLoop);
+    }
+
     private onLoop(): void
     {
         if (this.IS_PAUSE || this.IS_OVER) { return; }

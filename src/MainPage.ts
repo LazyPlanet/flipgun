@@ -112,10 +112,9 @@ class MainPge
 
     private onPlay(evt: Event): void 
     {
-        this._gunIndex = 0;
         this._view.visible = false; //隐藏当前界面
 
-        this._playPage = new PlayPage(this._gunIndex);
+        this._playPage = new PlayPage(this._selectedIndex);
         this._playPage.zOrder = -10;
         Laya.stage.addChild(this._playPage);
     }
