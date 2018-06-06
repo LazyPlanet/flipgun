@@ -44,7 +44,7 @@ class BackGround extends Laya.Sprite
         this.addChild(this.bg1);
 
         //创建背景2
-        this.bg2 = new Sprite().loadImage("res/BackGround2.png");
+        this.bg2 = new Sprite().loadImage("res/BackGround1.png");
         this.bg2.pos(0, -this.BG_HEIGHT);
         this.addChild(this.bg2);
 

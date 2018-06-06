@@ -2,7 +2,7 @@ import Handler = laya.utils.Handler;
 import Loader = laya.net.Loader;
 
 // 程序入口
-class GameMain
+class GameRun
 {
     public _mainPage: MainPge;
 
@@ -37,6 +37,6 @@ class GameMain
 Laya.MiniAdpter.init();
 
 //开始主程序
-var _gamePage = new GameMain();
+var _gamePage = new GameRun();
 
 

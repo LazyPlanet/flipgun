@@ -53,15 +53,13 @@ class PlayPage extends Sprite
     private IS_PAUSE = false;
     private IS_OVER = false;
 
-    //背景移动速度
-    private BG_SPEED = 3;
     //背景的帧处理间隔
     private BG_FRAME_DELAY = 1;
 
     private _bg = null;
     private _floor = null;
 
-    public constructor() 
+    public constructor(gunIndex: number) 
     {
         super();
         
@@ -101,8 +99,6 @@ class PlayPage extends Sprite
       
         var angle = this._gun.angle;
 
-        //console.log("角度:" + angle);
-
         if (angle > 2 * Math.PI)
         {
             var num = Math.floor(0.5 * angle / Math.PI);
@@ -116,6 +112,8 @@ class PlayPage extends Sprite
         if (y0 < 0) y0 = 0;
 
         this.Matter.Body.applyForce(this._gun, this._gun.position, { x: x0, y: -y0 });
+
+        //this._bg.y += y0; //背景移动，仿佛枪在上移
 
         var rotateValue = Math.PI / 15;
         if (Math.PI < angle && angle < 2 * Math.PI) rotateValue *= -1;
@@ -247,56 +245,6 @@ class PlayPage extends Sprite
         //this.Matter.Events.on(this._engine, 'collisionActive', this.onCollision);
     }
 
-    private onCollision(event): void
-    {
-        console.log("碰撞了..");
-
-        var home = _gamePage._mainPage._playPage;
-
-        for(var i = 0; i < event.pairs.length; i++) {
-
-            var pair = event.pairs[i];
-
-            if(!(pair.bodyA.label === 'gun' || pair.bodyB.label == "gun")) continue;
-
-            var other;
-
-            if (pair.bodyA.label === 'gun')
-            {
-                other = pair.bodyB;
-            }
-            else
-            {
-                other = pair.bodyA;
-            }
-
-            switch(other.label)
-            {
-                case "gameover":
-                {
-                    home.onGameOver();
-                }
-                break;
-
-                case "coin":
-                {
-                    home.gainCoin(1);
-                }
-                break;
-
-                case "bullet":
-                {
-                    home.gainBullet(1);
-                }
-                break;
-            }
-
-            console.log("删除物体:", other.label);
-
-            //home.Matter.World.remove(home._engine.world, other);
-        }
-    }
-
     private onGameOver(): void
     {
         if (this._gameOver) return;
@@ -342,8 +290,8 @@ class PlayPage extends Sprite
             this._gun_right.angle = angle;
         }
 
-        console.log("心跳参数输出:" +  "this._gun.position:" + this._gun.position.x + " " + this._gun.position.y + " " 
-                + " this._gun_right:" + this._gun_right.position.x + " " + this._gun_right.position.y);
+        //console.log("心跳参数输出:" +  "this._gun.position:" + this._gun.position.x + " " + this._gun.position.y + " " 
+        //        + " this._gun_right:" + this._gun_right.position.x + " " + this._gun_right.position.y);
 
         if (-Laya.stage.width + this._gun.width / 2 < gun_x && gun_x < this._gun.width / 2)
         {
@@ -399,18 +347,25 @@ class PlayPage extends Sprite
         }
 
         this.hitCheck(this._gun);
+        this.hitCheck(this._gun_right);
     }
 
     public hitCheck(player): void
     {
-        var itemBack1 = this._bg.itemBack1;
+        this.itemCheck(player, this._bg.itemBack1);
+        this.itemCheck(player, this._bg.itemBack2);
+    }
 
-        for(var i = 0; i < itemBack1.length; ++i)
+    private itemCheck(player, itemList): void
+    {
+        var itemBack1 = this._bg.itemList;
+
+        for(var i = 0; i < itemList.length; ++i)
         {
             var playerX = player.position.x;
             var playerY = player.position.y;
 
-            var element = itemBack1[i];
+            var element = itemList[i];
             if (!element.visible) continue;
 
             var itemX = element.x + this._bg.x;
@@ -420,30 +375,22 @@ class PlayPage extends Sprite
 
             var pY_left = itemY % Laya.stage.height - itemHeight / 2;
             var pY_right = itemY % Laya.stage.height + itemHeight / 2;
-            /*
-            console.log("检测碰撞物体:" + " playerX:" + playerX + " playerY:" + playerY + " " + player.render.sprite.width + " " + player.render.sprite.height);
-            console.log("检测碰撞物体: itemX:" + itemX + " itemY:" + itemY + " itemWidth:" + itemWidth + " itemHeight:" + itemHeight + " pY_left:" + pY_left + " pY_right:" + pY_right);
-
-            var bg1 = this._bg.bg1;
-            var bg2 = this._bg.bg2;
-
-            console.log("bg1：" + bg1.x + " " + bg1.y);
-            console.log("bg2：" + bg2.x + " " + bg2.y);
-            console.log("this._bg：" + this._bg.x + " " + this._bg.y);
-            console.log("element：" + element.x + " " + element.y + " " + element.width + " " + element.height);
-            */
-
-            if (playerX < itemX - itemWidth / 2 || playerX > itemX + itemWidth / 2 || playerY < pY_left || playerY > pY_right)
+            
+            if (playerX + this._gun.width / 2 < itemX - itemWidth / 2 || playerX - this._gun.width / 2 > itemX + itemWidth / 2 || 
+                playerY + this._gun.height / 2 < pY_left || playerY - this._gun.height / 2 > pY_right)
             {
                 continue;
             }
 
             var itemType = element.getType();
 
-            switch(itemType){
+            switch(itemType)
+            {
                 case Item.ITEM_TYPE_JIASU: //加速
                 {
-                    //this._gun.position.y += 10;
+                    console.debug("加速.");
+
+                    this._bg.y += 10;
                 }
                 break;
 
@@ -451,6 +398,7 @@ class PlayPage extends Sprite
                 {
                     element.visible = false;
                     this._bg.removeChild(element);
+
                     this.gainCoin(1);
                 }
                 break;
@@ -459,6 +407,7 @@ class PlayPage extends Sprite
                 {
                     element.visible = false;
                     this._bg.removeChild(element);
+
                     this.gainBullet(1);
                 }
                 break;
@@ -467,9 +416,8 @@ class PlayPage extends Sprite
                     alert("错误物品!");
                 break;
             }
-            
 
-            //console.log("删除碰撞物体");
+           
         }
     }
 
