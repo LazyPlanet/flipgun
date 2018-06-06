@@ -573,10 +573,10 @@ public static list = {
 "guns" : [
 	//{ "name" : "手枪", "icon" : "shouQiang_001.png", "weight" : 1, "rate" : 1, "ammo" : 10 },
 	{ "name" : "AK-47", "icon" : "ak_47.png", "weight" : 1, "rate" : 1, "ammo" : 10 },
-	{ "name" : "AK-47", "icon" : "ak_47.png", "weight" : 2, "rate" : 2, "ammo" : 20 },
-	{ "name" : "AK-47", "icon" : "ak_47.png", "weight" : 3, "rate" : 3, "ammo" : 30 },
-	{ "name" : "AK-47", "icon" : "ak_47.png", "weight" : 3, "rate" : 3, "ammo" : 30 },
-	{ "name" : "AK-47", "icon" : "ak_47.png", "weight" : 3, "rate" : 3, "ammo" : 30 },
+	{ "name" : "AK-47-1", "icon" : "ak_47.png", "weight" : 2, "rate" : 2, "ammo" : 20 },
+	{ "name" : "AK-47-2", "icon" : "ak_47.png", "weight" : 3, "rate" : 3, "ammo" : 30 },
+	{ "name" : "AK-47-3", "icon" : "ak_47.png", "weight" : 3, "rate" : 3, "ammo" : 30 },
+	{ "name" : "AK-47-4", "icon" : "ak_47.png", "weight" : 3, "rate" : 3, "ammo" : 30 },
 ]
 
 } //end of list

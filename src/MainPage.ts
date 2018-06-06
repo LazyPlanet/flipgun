@@ -14,7 +14,6 @@ class MainPge
 
     private _playBtn: fairygui.GObject;
     private _bestScore: fairygui.GObject;
-    private _circleBg: fairygui.GObject;
     private _gunName: fairygui.GObject;
     private _gunList: fairygui.GList;
     private _ammoNum: fairygui.GLabel;
@@ -33,11 +32,7 @@ class MainPge
         this._playBtn.onClick(this, this.onPlay);
 
         this._bestScore = this._view.getChild("BestScoreNum"); //最高分数
-
-        this._circleBg = this._view.getChild("n32"); 
-
-        this._gunName = this._view.getChild("GunName");
-        this._gunName.text = "大枪";
+        this._gunName = this._view.getChild("GunName"); //枪名字
 
         this._gunList = this._view.getChild("GunList").asList;
         this._gunList.removeChildrenToPool();
@@ -92,6 +87,7 @@ class MainPge
         if (!selectedGun) return;
 
         this._ammoNum.text = selectedGun.ammo.toString();
+        this._gunName.text = selectedGun.name;
 
         //设置质量
         for (var i = 0; i < this._weight.asList.numChildren; ++i)
