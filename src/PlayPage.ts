@@ -66,16 +66,13 @@ class PlayPage extends Sprite
         this._view.onClick(this, this.onClick);
 
         this._score = this._view.getChild("Score"); 
-        this._score.asTextField.text = "" + 0; //初始分数
-
         this._ammoList = this._view.getChild("AmmoList"); 
         this._ammoNum = this._view.getChild("AmmoNum"); 
-
         this._coins = this._view.getChild("CoinsNum"); 
-        this._coins.asTextField.text = "" + 0; //初始金币数
 
         this._heartCount = 0; //心跳
         this._coinNum = 0; //金币数量
+        this._scoreNum = 0; //分数
        
         this._selectedGun = ItemNormal.list.guns[gunIndex];
         if (!this._selectedGun) return;
@@ -142,6 +139,7 @@ class PlayPage extends Sprite
     private onUpdate(): void
     {
         this._ammoNum.text = this._bulletNum.toString();
+        this._score.text = this._scoreNum.toString();
 
         //设置质量
         for (var i = 0; i < this._ammoList.asList.numChildren; ++i)
