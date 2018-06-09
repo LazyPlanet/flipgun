@@ -1,5 +1,5 @@
 // 程序入口
-class MainPge
+class MainPge extends Laya.Sprite
 {
     public _playPage: PlayPage;
 
@@ -20,10 +20,12 @@ class MainPge
     private _weight: fairygui.GObject;
     private _rate: fairygui.GObject;
 
-    private _selectedIndex = 0; //默认选择第一把枪
+    public _selectedIndex = 0; //默认选择第一把枪
 
     constructor()
     {
+        super();
+
         this._view = fairygui.UIPackage.createObject("GunUI", "MainMenu").asCom;
         this._view.setSize(fairygui.GRoot.inst.width, fairygui.GRoot.inst.height);
         fairygui.GRoot.inst.addChild(this._view);
@@ -112,11 +114,16 @@ class MainPge
 
     private onPlay(evt: Event): void 
     {
-        this._view.visible = false; //隐藏当前界面
+        this.showPage(false);//隐藏当前界面
 
         this._playPage = new PlayPage(this._selectedIndex);
         this._playPage.zOrder = -10;
         Laya.stage.addChild(this._playPage);
+    }
+
+    public showPage(show: boolean): void
+    {
+        this._view.visible = show;
     }
 }
 

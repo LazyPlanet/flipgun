@@ -46,7 +46,8 @@ class ContinuePage extends Laya.Sprite
     private BG_FRAME_DELAY = 1;
 
     private _bg = null;
-    private _floor = null;
+    private _playBtn: fairygui.GObject;
+    private _skipBtn: fairygui.GObject;
 
     public constructor() 
     {
@@ -67,9 +68,26 @@ class ContinuePage extends Laya.Sprite
 
     private init(): void
     {
-        
+        this._playBtn = this._view.getChild("ContinueButton"); //开始按钮
+        this._playBtn.onClick(this, this.onPlay);
+
+        this._skipBtn = this._view.getChild("SkipButton"); //跳过按钮
+        this._skipBtn.onClick(this, this.onSkip);
+    }
+
+    private onPlay(evt: Event): void 
+    {
+        this._view.visible = false; //隐藏当前界面
+
+        var playPage = new PlayPage(_gamePage._mainPage._selectedIndex);
+        playPage.zOrder = -10;
+        Laya.stage.addChild(playPage);
     }
     
-    
+    private onSkip(evt: Event): void 
+    {
+        this._view.visible = false; //隐藏当前界面
+        _gamePage._mainPage.showPage(true);
+    }
 
 } //class

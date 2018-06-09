@@ -64,7 +64,7 @@ class BackGround extends Laya.Sprite
         if (this.IS_PAUSE || this.IS_OVER) { return; }
 
         //移动
-        this.y += this.BG_SPEED;
+        //this.y += this.BG_SPEED;
 
         //当背景1向下移动出游戏的显示区域，则将背景1的y轴坐标,向下移动*2.
         if (this.bg1.y + this.y >= this.BG_HEIGHT) 

@@ -36,6 +36,7 @@ class PlayPage extends Sprite
     private _coinNum: number;
     private _bulletNum: number;
     private _ammoNum: any;
+    private _scoreNum: number; //分数
 
     private bg1: any;
     private bg2: any;
@@ -126,7 +127,7 @@ class PlayPage extends Sprite
 
         this.Matter.Body.applyForce(this._gun, this._gun.position, { x: x0, y: -y0 });
 
-        //this._bg.y += y0; //背景移动，仿佛枪在上移
+        this._bg.y += (y0 * 10); //背景移动，仿佛枪在上移
 
         var rotateValue = Math.PI / 15;
         if (Math.PI < angle && angle < 2 * Math.PI) rotateValue *= -1;
@@ -307,6 +308,8 @@ class PlayPage extends Sprite
 
         //console.log("心跳参数输出:" +  "this._gun.position:" + this._gun.position.x + " " + this._gun.position.y + " " 
         //        + " this._gun_right:" + this._gun_right.position.x + " " + this._gun_right.position.y);
+
+        console.log(this._bg.y);
 
         if (-Laya.stage.width + this._gun.width / 2 < gun_x && gun_x < this._gun.width / 2)
         {
