@@ -80,7 +80,6 @@ class PausePage extends Laya.Sprite
         this._ammoNum.text = this._bulletNum.toString();
         this._coins.text = this._coinNum.toString();
 
-        //设置质量
         for (var i = 0; i < this._ammoList.asList.numChildren; ++i)
         {
             var element = this._ammoList.asList._children[i];
@@ -93,6 +92,7 @@ class PausePage extends Laya.Sprite
     private onPlay(evt: Event): void 
     {
         this._view.visible = false; //隐藏当前界面
+        _gamePage._mainPage._playPage.resetNum(this._scoreNum, this._bulletNum, this._coinNum);
         _gamePage._mainPage._playPage.onPause();
         this.destroy();
     }

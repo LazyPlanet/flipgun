@@ -150,7 +150,6 @@ class PlayPage extends Sprite
         this._coins.asTextField.text = this._coinNum.toString();
         this._score.text = this._scoreNum.toString();
 
-        //设置质量
         for (var i = 0; i < this._ammoList.asList.numChildren; ++i)
         {
             var element = this._ammoList.asList._children[i];
@@ -158,6 +157,15 @@ class PlayPage extends Sprite
             if (i < this._bulletNum) { element.getController("Empty").selectedIndex = 0; } //白底
             else { element.getController("Empty").selectedIndex = 1; } //黑底
         }
+    }
+
+    public resetNum(score: number, bullet: number, coins: number): void
+    {
+        this._scoreNum = score;
+        this._bulletNum = bullet;
+        this._coinNum = coins;
+
+        this.onUpdate();
     }
 
     public onPause(): void
@@ -322,6 +330,8 @@ class PlayPage extends Sprite
     {
         if (this._paused) 
         {
+            console.log("暂停游戏，隐藏枪支.");
+
             this._gun.render.visible = false;
             this._gun_right.render.visible = false;
             return;
