@@ -18,7 +18,7 @@ class PlayPage extends Sprite
     private _coins: fairygui.GObject; //金币
     
     private _gun: any; //fairygui.GObject; //枪
-    private _gun_left: any; //fairygui.GObject; //枪
+    //private _gun_left: any; //fairygui.GObject; //枪
     private _gun_right: any; //fairygui.GObject; //枪
 
     private _selectedGun: any; //玩家选择枪的配置数据
@@ -55,6 +55,7 @@ class PlayPage extends Sprite
 
     private _bg = null;
     private _floor = null;
+    private _pausePage = null;
 
     public constructor(gunIndex: number) 
     {
@@ -106,7 +107,7 @@ class PlayPage extends Sprite
     private onClick(evt: Event): void 
     {
         if (this._paused) return;
-        
+
         if (this.isOver()) 
         {
             console.warn("游戏已经结束，不能再次点击.");
@@ -159,15 +160,32 @@ class PlayPage extends Sprite
         }
     }
 
-    private onPause(): void
+    public onPause(): void
     {
         this._paused = !this._paused;
         this._bg.onPause(this._paused);
+        
+        console.log("暂停游戏:" + this._paused);
+
+        if (this._paused)
+        {
+            this._view.visible = false;
+            this._gun.render.visible = false;
+            this._gun_right.render.visible = false;
+
+            this._pausePage = new PausePage(this._scoreNum, this._bulletNum, this._coinNum);
+            //this._pausePage.zOrder = 1;
+            Laya.stage.addChild(this._pausePage);
+        }
+        else
+        {
+            this._view.visible = true;
+            this._gun.render.visible = true;
+            //this._gun_right.render.visible = true;
+        }
 
         this._gun.isStatic = this._paused;
         this._gun_right.isStatic = this._paused;
-
-        console.log("暂停游戏:" + this._paused);
     }
 
     private setScore(score: number)
@@ -296,13 +314,18 @@ class PlayPage extends Sprite
         Laya.timer.clear(this, this.onHeartBeat); //删除定时器
 
         if (this._gun) this.Matter.World.remove(this._engine.world, this._gun); //删除枪
-        if (this._gun_left) this.Matter.World.remove(this._engine.world, this._gun_left); //删除枪
+        //if (this._gun_left) this.Matter.World.remove(this._engine.world, this._gun_left); //删除枪
         if (this._gun_right) this.Matter.World.remove(this._engine.world, this._gun_right); //删除枪
     }
     
     private onHeartBeat(): void
     {
-        if (this._paused) return;
+        if (this._paused) 
+        {
+            this._gun.render.visible = false;
+            this._gun_right.render.visible = false;
+            return;
+        }
 
         if (this.isOver())
         {
