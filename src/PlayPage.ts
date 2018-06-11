@@ -22,6 +22,7 @@ class PlayPage extends Sprite
     private _gun_right: any; //fairygui.GObject; //枪
 
     private _selectedGun: any; //玩家选择枪的配置数据
+    private _pauseBtn: fairygui.GObject; //暂停
 
     private _clickCount = 0; //玩家点击次数
     private _gameOver = false; //游戏是否结束
@@ -79,6 +80,7 @@ class PlayPage extends Sprite
         this._bulletNum = this._selectedGun.ammo; //子弹数量
         
         this._gameOver = false;
+        this._paused = false;
 
         this.init(); //初始化
     }
@@ -95,11 +97,16 @@ class PlayPage extends Sprite
 
         this.onUpdate();
 
+        this._pauseBtn = this._view.getChild("PauseButton"); //开始按钮
+        this._pauseBtn.onClick(this, this.onPause);
+
         Laya.timer.frameLoop(1, this, this.onHeartBeat); //心跳
     }
     
     private onClick(evt: Event): void 
     {
+        if (this._paused) return;
+        
         if (this.isOver()) 
         {
             console.warn("游戏已经结束，不能再次点击.");
@@ -124,7 +131,7 @@ class PlayPage extends Sprite
 
         this.Matter.Body.applyForce(this._gun, this._gun.position, { x: x0, y: -y0 });
 
-        this._bg.y += (y0 * 10); //背景移动，仿佛枪在上移
+        //this._bg.y += (y0 * 10); //背景移动，仿佛枪在上移
 
         var rotateValue = Math.PI / 15;
         if (Math.PI < angle && angle < 2 * Math.PI) rotateValue *= -1;
@@ -139,6 +146,7 @@ class PlayPage extends Sprite
     private onUpdate(): void
     {
         this._ammoNum.text = this._bulletNum.toString();
+        this._coins.asTextField.text = this._coinNum.toString();
         this._score.text = this._scoreNum.toString();
 
         //设置质量
@@ -151,24 +159,32 @@ class PlayPage extends Sprite
         }
     }
 
+    private onPause(): void
+    {
+        this._paused = !this._paused;
+        this._bg.onPause(this._paused);
+
+        this._gun.isStatic = this._paused;
+        this._gun_right.isStatic = this._paused;
+
+        console.log("暂停游戏:" + this._paused);
+    }
+
     private setScore(score: number)
     {
-        this._score.asTextField.text = score.toString();
+        this._scoreNum += score;
+        console.log("增加分数，当前分数数量:" + this._scoreNum);
     }
 
     private gainCoin(count: number)
     {
         this._coinNum = this._coinNum + count;
-        this._coins.asTextField.text = this._coinNum.toString();
-
         console.log("增加金币，当前金币数量:" + this._coinNum);
     }
 
     private gainBullet(count: number)
     {
         this._bulletNum = this._bulletNum + count;
-        this._ammoNum.asTextField.text = this._bulletNum.toString();
-
         console.log("增加金币，当前数量:" + this._bulletNum);
     }
 
@@ -247,7 +263,7 @@ class PlayPage extends Sprite
             collisionFilter: {group: false}
         });
 
-        this.Matter.World.add(this._engine.world, [this._gun, this._gun_right ]);
+        this.Matter.World.add(this._engine.world, [ this._gun, this._gun_right ]);
     }
 
     private onGameOver(): void
@@ -257,7 +273,7 @@ class PlayPage extends Sprite
         this._view.visible = false; //隐藏当前界面
         this._bg.visible = false; //隐藏背景图
 
-        var continuePage = new ContinuePage();
+        var continuePage = new ContinuePage(this._scoreNum);
         Laya.stage.addChild(continuePage);
 
         this._gameOver = true;
@@ -286,6 +302,8 @@ class PlayPage extends Sprite
     
     private onHeartBeat(): void
     {
+        if (this._paused) return;
+
         if (this.isOver())
         {
             this.onGameOver();
@@ -307,7 +325,9 @@ class PlayPage extends Sprite
         //console.log("心跳参数输出:" +  "this._gun.position:" + this._gun.position.x + " " + this._gun.position.y + " " 
         //        + " this._gun_right:" + this._gun_right.position.x + " " + this._gun_right.position.y);
 
-        console.log(this._bg.y);
+        //console.log("背景移动距离:" + this._bg.y);
+
+        this._scoreNum = this._bg.y;
 
         if (-Laya.stage.width + this._gun.width / 2 < gun_x && gun_x < this._gun.width / 2)
         {
@@ -341,7 +361,17 @@ class PlayPage extends Sprite
 
             console.log("超过屏幕，调整位置，此时使用左侧枪");
 
-            this._gun_right.render.visible = true;
+            if (this._gun.position.x > 0 && this._gun.position.x < Laya.stage.width)
+            {
+                this._gun_right.render.visible = false;
+            }
+            else
+            {
+                this._gun_right.render.visible = true;
+            }
+
+            console.log("调试日志:" +  "this._gun.position:" + this._gun.position.x + " " + this._gun.position.y + " " 
+                + " this._gun_right:" + this._gun_right.position.x + " " + this._gun_right.position.y);
         }
         else if (gun_x > Laya.stage.width * 2 - this._gun.width / 2)
         {

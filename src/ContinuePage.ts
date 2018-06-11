@@ -10,7 +10,8 @@ class ContinuePage extends Laya.Sprite
     private _score: fairygui.GObject; //分数
     private _ammoList: fairygui.GObject; //子弹数
     private _coins: fairygui.GObject; //金币
-    
+    private _scoreNum: number;
+
     private _gun: any; //fairygui.GObject; //枪
     private _gun_left: any; //fairygui.GObject; //枪
     private _gun_right: any; //fairygui.GObject; //枪
@@ -23,8 +24,6 @@ class ContinuePage extends Laya.Sprite
 
 	public Matter: any = Browser.window.Matter;
 	public LayaRender: any = Browser.window.LayaRender;
-		
-	public _engine: any;
 
     private _heartCount: number;
     private _coinNum: number;
@@ -49,7 +48,7 @@ class ContinuePage extends Laya.Sprite
     private _playBtn: fairygui.GObject;
     private _skipBtn: fairygui.GObject;
 
-    public constructor() 
+    public constructor(score: number) 
     {
         super();
         
@@ -57,9 +56,9 @@ class ContinuePage extends Laya.Sprite
         this._view.setSize(fairygui.GRoot.inst.width,fairygui.GRoot.inst.height);
         fairygui.GRoot.inst.addChild(this._view);
 
-        this._score = this._view.getChild("Score"); 
-        this._score.asTextField.text = "" + 0; //初始分数
+        this._scoreNum = score;
 
+        this._score = this._view.getChild("Score"); 
         this._ammoList = this._view.getChild("AmmoList"); 
         this._ammoNum = this._view.getChild("AmmoNum"); 
 
@@ -73,6 +72,8 @@ class ContinuePage extends Laya.Sprite
 
         this._skipBtn = this._view.getChild("SkipButton"); //跳过按钮
         this._skipBtn.onClick(this, this.onSkip);
+
+         this._score.text = this._scoreNum.toString();
     }
 
     private onPlay(evt: Event): void 

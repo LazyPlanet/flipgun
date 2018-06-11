@@ -54,8 +54,14 @@ class BackGround extends Laya.Sprite
         Laya.timer.frameLoop(this.BG_FRAME_DELAY, this, this.onLoop)
     }
 
+    public onPause(pause: boolean): void
+    {
+        this.IS_PAUSE = pause;
+    }
+
     public onGameOver(): void
     {
+        this.IS_OVER = true;
         Laya.timer.clear(this, this.onLoop);
     }
 
@@ -64,7 +70,7 @@ class BackGround extends Laya.Sprite
         if (this.IS_PAUSE || this.IS_OVER) { return; }
 
         //移动
-        //this.y += this.BG_SPEED;
+        this.y += this.BG_SPEED;
 
         //当背景1向下移动出游戏的显示区域，则将背景1的y轴坐标,向下移动*2.
         if (this.bg1.y + this.y >= this.BG_HEIGHT) 
