@@ -26,6 +26,9 @@ var MainPge = /** @class */ (function (_super) {
         _this._ammoNum = _this._view.getChild("AmmoNum").asLabel;
         _this._weight = _this._view.getChild("WeightList").asList;
         _this._rate = _this._view.getChild("FireRateList").asList;
+        _this._coinsNum = _this._view.getChild("CoinsNum");
+        _this._coinNum = 0;
+        _this._bestScoreNum = 0;
         _this.init();
         return _this;
     }
@@ -54,6 +57,8 @@ var MainPge = /** @class */ (function (_super) {
         this.onUpdateGun();
     };
     MainPge.prototype.onUpdateGun = function () {
+        this._bestScore.text = this._bestScoreNum.toString();
+        this._coinsNum.text = this._coinNum.toString();
         if (this._selectedIndex < 0 || this._selectedIndex >= ItemNormal.list.guns.length)
             return;
         var selectedGun = ItemNormal.list.guns[this._selectedIndex];

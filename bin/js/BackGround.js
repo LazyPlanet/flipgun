@@ -48,6 +48,12 @@ var BackGround = /** @class */ (function (_super) {
         this.IS_OVER = true;
         Laya.timer.clear(this, this.onLoop);
     };
+    BackGround.prototype.resetMoveSpeeed = function (speed) {
+        this.BG_SPEED = speed;
+    };
+    BackGround.prototype.pushDown = function (y) {
+        this.y += y;
+    };
     BackGround.prototype.onLoop = function () {
         if (this.IS_PAUSE || this.IS_OVER) {
             return;

@@ -32,6 +32,7 @@ class PlayPage extends Sprite
 	public LayaRender: any = Browser.window.LayaRender;
 		
 	public _engine: any;
+    public _render: any;
 
     private _heartCount: number;
     private _coinNum: number;
@@ -129,7 +130,7 @@ class PlayPage extends Sprite
         }
 
         console.log("播放音效");
-		Laya.SoundManager.playSound("wav/AK47.mp3", 1);
+		//Laya.SoundManager.playSound("wav/AK47.mp3", 1);
 	
         ++this._clickCount;
       
@@ -140,7 +141,7 @@ class PlayPage extends Sprite
             var num = Math.floor(0.5 * angle / Math.PI);
             angle -= (num * 2 * Math.PI);
         }
-
+                
         var force = 0.08 * this._gun.mass;
         var x0 = force * Math.sin(angle);
         var y0 = force * Math.cos(angle);
@@ -148,8 +149,6 @@ class PlayPage extends Sprite
         if (y0 < 0) y0 = 0;
 
         this.Matter.Body.applyForce(this._gun, this._gun.position, { x: x0, y: -y0 });
-
-        //this._bg.y += (y0 * 10); //背景移动，仿佛枪在上移
 
         var rotateValue = Math.PI / 15;
         if (Math.PI < angle && angle < 2 * Math.PI) rotateValue *= -1;
@@ -198,8 +197,9 @@ class PlayPage extends Sprite
         if (this._paused)
         {
             this._view.visible = false;
-            this._gun.render.visible = false;
-            this._gun_right.render.visible = false;
+
+            if (this._gun) this.Matter.World.remove(this._engine.world, this._gun); //删除枪
+            if (this._gun_right) this.Matter.World.remove(this._engine.world, this._gun_right); //删除枪
 
             this._pausePage = new PausePage(this._scoreNum, this._bulletNum, this._coinNum);
             this._pausePage.zOrder = 1;
@@ -208,8 +208,8 @@ class PlayPage extends Sprite
         else
         {
             this._view.visible = true;
-            this._gun.render.visible = true;
-            //this._gun_right.render.visible = true;
+            if (this._gun) this.Matter.World.add(this._engine.world, this._gun); //删除枪
+            if (this._gun_right) this.Matter.World.add(this._engine.world, this._gun_right); //删除枪
         }
     }
 
@@ -249,11 +249,11 @@ class PlayPage extends Sprite
 			
         //this._engine.world.gravity.y = 1;
 
-		var render = this.LayaRender.create({engine: this._engine, options: {
+		this._render = this.LayaRender.create({engine: this._engine, options: {
                 background: '#000000', wireframes: false
             }
         });
-		this.LayaRender.run(render);
+		this.LayaRender.run(this._render);
     }
 		
     private initWorld(): void
@@ -312,11 +312,7 @@ class PlayPage extends Sprite
             collisionFilter: {group: false}
         });
 
-
         this.Matter.World.add(this._engine.world, [ this._gun, this._gun_right ]);
-
-        //this._gun.render.visible = false;
-        
     }
 
     private onGameOver(): void
@@ -354,14 +350,23 @@ class PlayPage extends Sprite
     
     private onHeartBeat(): void
     {
+        //console.log("此时枪支状态1:" + this._gun.render.visible + " " + this._gun_right.render.visible);
+
         if (this._paused) 
         {
+            if (this._gun) this.Matter.World.remove(this._engine.world, this._gun); //删除枪
+
             if (!this._gun.render.visible) return;
 
             console.log("暂停游戏，隐藏枪支.");
+
             this._gun.isStatic = false;
+            this._gun_right.isStatic = false;
             this._gun.render.visible = false;
             this._gun_right.render.visible = false;
+            this._gun.render.sprite.texture.visible = false;
+            this._gun_right.render.sprite.visible = false;
+            
             return;
         }
 
@@ -383,8 +388,8 @@ class PlayPage extends Sprite
             this._gun_right.angle = angle;
         }
 
-        //console.log("心跳参数输出:" +  "this._gun.position:" + this._gun.position.x + " " + this._gun.position.y + " " 
-        //        + " this._gun_right:" + this._gun_right.position.x + " " + this._gun_right.position.y);
+        console.log("心跳参数输出:" +  "this._gun.position:" + this._gun.position.x + " " + this._gun.position.y + " " 
+                + " this._gun_right:" + this._gun_right.position.x + " " + this._gun_right.position.y);
 
         //console.log("背景移动距离:" + this._bg.y);
 
@@ -397,7 +402,7 @@ class PlayPage extends Sprite
 
             this._gun_right.position.x = Laya.stage.width + gun_x;
 
-            console.log("此时使用右侧枪"); 
+            //console.log("此时使用右侧枪"); 
 
             this._gun_right.render.visible = true;
         }
@@ -411,7 +416,7 @@ class PlayPage extends Sprite
 
             this._gun_right.render.visible = false;
 
-            console.log("移动枪到右侧枪位置，隐藏右侧枪支");
+            //console.log("移动枪到右侧枪位置，隐藏右侧枪支");
         }
         else if (gun_x < Laya.stage.width * 2 - this._gun.width / 2 && gun_x > Laya.stage.width - this._gun.width / 2)
         {
@@ -420,7 +425,7 @@ class PlayPage extends Sprite
 
             this._gun_right.position.x = gun_x - Laya.stage.width;
 
-            console.log("超过屏幕，调整位置，此时使用左侧枪");
+            //console.log("超过屏幕，调整位置，此时使用左侧枪");
 
             if (this._gun.position.x > 0 && this._gun.position.x < Laya.stage.width)
             {
@@ -431,8 +436,8 @@ class PlayPage extends Sprite
                 this._gun_right.render.visible = true;
             }
 
-            console.log("调试日志:" +  "this._gun.position:" + this._gun.position.x + " " + this._gun.position.y + " " 
-                + " this._gun_right:" + this._gun_right.position.x + " " + this._gun_right.position.y);
+            //console.log("调试日志:" +  "this._gun.position:" + this._gun.position.x + " " + this._gun.position.y + " " 
+            //    + " this._gun_right:" + this._gun_right.position.x + " " + this._gun_right.position.y);
         }
         else if (gun_x > Laya.stage.width * 2 - this._gun.width / 2)
         {
@@ -441,7 +446,7 @@ class PlayPage extends Sprite
 
             this.Matter.Body.setPosition(this._gun, position);
 
-            console.log("超过屏幕2倍，调整位置，此时使用左侧枪");
+            //console.log("超过屏幕2倍，调整位置，此时使用左侧枪");
 
             this._gun.angle = this._gun_right.angle;
         }
@@ -453,8 +458,13 @@ class PlayPage extends Sprite
             //console.log("恢复正常状态");
         }
 
+        if (this._gun.position.y > Laya.stage.height) this._gameOver = true;
+
+
         this.hitCheck(this._gun);
         this.hitCheck(this._gun_right);
+
+        //console.log("此时枪支状态:" + this._gun.render.visible + " " + this._gun_right.render.visible);
     }
 
     public hitCheck(player): void

@@ -11,12 +11,15 @@ class MainPge extends Laya.Sprite
     private _demoObjects: any;
 
     private _gunIndex: number;
+    private _coinNum: number; //金币数量
+    private _bestScoreNum: number; //最好成绩
 
     private _playBtn: fairygui.GObject;
     private _bestScore: fairygui.GObject;
     private _gunName: fairygui.GObject;
     private _gunList: fairygui.GList;
     private _ammoNum: fairygui.GLabel;
+    private _coinsNum: fairygui.GObject;
     private _weight: fairygui.GObject;
     private _rate: fairygui.GObject;
 
@@ -42,6 +45,10 @@ class MainPge extends Laya.Sprite
         this._ammoNum = this._view.getChild("AmmoNum").asLabel;
         this._weight = this._view.getChild("WeightList").asList;
         this._rate = this._view.getChild("FireRateList").asList;
+        this._coinsNum = this._view.getChild("CoinsNum");
+
+        this._coinNum = 0;
+        this._bestScoreNum = 0;
 
         this.init();
     }
@@ -67,6 +74,7 @@ class MainPge extends Laya.Sprite
         item.getChild("GunLoader").asCom.getChild("GunPicLoader").asLoader.icon = ""; //最后面增加一个空白页
 
         this._gunList.on(fairygui.Events.SCROLL_END, this, this.onSelectGun);
+
         this.onUpdateGun();
     }
 
@@ -83,6 +91,9 @@ class MainPge extends Laya.Sprite
 
     private onUpdateGun(): void
     {
+        this._bestScore.text = this._bestScoreNum.toString();
+        this._coinsNum.text = this._coinNum.toString();
+        
         if (this._selectedIndex < 0 || this._selectedIndex >= ItemNormal.list.guns.length) return;
 
         var selectedGun = ItemNormal.list.guns[this._selectedIndex];

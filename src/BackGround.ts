@@ -65,6 +65,16 @@ class BackGround extends Laya.Sprite
         Laya.timer.clear(this, this.onLoop);
     }
 
+    public resetMoveSpeeed(speed: number): void
+    {
+        this.BG_SPEED = speed;
+    }
+
+    public pushDown(y: number): void
+    {
+        this.y += y;
+    }
+
     private onLoop(): void
     {
         if (this.IS_PAUSE || this.IS_OVER) { return; }

@@ -102,6 +102,7 @@ class PausePage extends Laya.Sprite
     private onHome(evt: Event): void 
     {
         this._view.visible = false; //隐藏当前界面
+        _gamePage._mainPage._playPage.destroy();
         _gamePage._mainPage.showPage(true);
         this.destroy();
     }
