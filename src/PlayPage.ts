@@ -129,7 +129,7 @@ class PlayPage extends Sprite
         }
 
         console.log("播放音效");
-		Laya.SoundManager.playSound("res/AK47.mp3", 0);
+		Laya.SoundManager.playSound("wav/AK47.mp3", 1);
 	
         ++this._clickCount;
       
