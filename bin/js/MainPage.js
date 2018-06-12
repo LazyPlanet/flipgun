@@ -1,20 +1,33 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 // 程序入口
-var MainPge = /** @class */ (function () {
+var MainPge = /** @class */ (function (_super) {
+    __extends(MainPge, _super);
     function MainPge() {
-        this._selectedIndex = 0; //默认选择第一把枪
-        this._view = fairygui.UIPackage.createObject("GunUI", "MainMenu").asCom;
-        this._view.setSize(fairygui.GRoot.inst.width, fairygui.GRoot.inst.height);
-        fairygui.GRoot.inst.addChild(this._view);
-        this._playBtn = this._view.getChild("PlayButton"); //开始按钮
-        this._playBtn.onClick(this, this.onPlay);
-        this._bestScore = this._view.getChild("BestScoreNum"); //最高分数
-        this._gunName = this._view.getChild("GunName"); //枪名字
-        this._gunList = this._view.getChild("GunList").asList;
-        this._gunList.removeChildrenToPool();
-        this._ammoNum = this._view.getChild("AmmoNum").asLabel;
-        this._weight = this._view.getChild("WeightList").asList;
-        this._rate = this._view.getChild("FireRateList").asList;
-        this.init();
+        var _this = _super.call(this) || this;
+        _this._selectedIndex = 0; //默认选择第一把枪
+        _this._view = fairygui.UIPackage.createObject("GunUI", "MainMenu").asCom;
+        _this._view.setSize(fairygui.GRoot.inst.width, fairygui.GRoot.inst.height);
+        fairygui.GRoot.inst.addChild(_this._view);
+        _this._playBtn = _this._view.getChild("PlayButton"); //开始按钮
+        _this._playBtn.onClick(_this, _this.onPlay);
+        _this._bestScore = _this._view.getChild("BestScoreNum"); //最高分数
+        _this._gunName = _this._view.getChild("GunName"); //枪名字
+        _this._gunList = _this._view.getChild("GunList").asList;
+        _this._gunList.removeChildrenToPool();
+        _this._ammoNum = _this._view.getChild("AmmoNum").asLabel;
+        _this._weight = _this._view.getChild("WeightList").asList;
+        _this._rate = _this._view.getChild("FireRateList").asList;
+        _this.init();
+        return _this;
     }
     MainPge.prototype.init = function () {
         var item = this._gunList.addItemFromPool().asButton;
@@ -71,11 +84,14 @@ var MainPge = /** @class */ (function () {
         console.log("选择枪支数据:" + selectedGun.ammo + " " + selectedGun.weight + " " + selectedGun.rate);
     };
     MainPge.prototype.onPlay = function (evt) {
-        this._view.visible = false; //隐藏当前界面
+        this.showPage(false); //隐藏当前界面
         this._playPage = new PlayPage(this._selectedIndex);
         this._playPage.zOrder = -10;
         Laya.stage.addChild(this._playPage);
     };
+    MainPge.prototype.showPage = function (show) {
+        this._view.visible = show;
+    };
     return MainPge;
-}());
+}(Laya.Sprite));
 //# sourceMappingURL=MainPage.js.map

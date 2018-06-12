@@ -30,21 +30,24 @@ var PlayPage = /** @class */ (function (_super) {
         _this.BG_FRAME_DELAY = 1;
         _this._bg = null;
         _this._floor = null;
+        _this._pausePage = null;
         _this._view = fairygui.UIPackage.createObject("GunUI", "PlayScene").asCom;
         _this._view.setSize(fairygui.GRoot.inst.width, fairygui.GRoot.inst.height);
         fairygui.GRoot.inst.addChild(_this._view);
         _this._view.onClick(_this, _this.onClick);
         _this._score = _this._view.getChild("Score");
-        _this._score.asTextField.text = "" + 0; //初始分数
         _this._ammoList = _this._view.getChild("AmmoList");
         _this._ammoNum = _this._view.getChild("AmmoNum");
         _this._coins = _this._view.getChild("CoinsNum");
-        _this._coins.asTextField.text = "" + 0; //初始金币数
         _this._heartCount = 0; //心跳
         _this._coinNum = 0; //金币数量
+        _this._scoreNum = 0; //分数
         _this._selectedGun = ItemNormal.list.guns[gunIndex];
+        if (!_this._selectedGun)
+            return _this;
         _this._bulletNum = _this._selectedGun.ammo; //子弹数量
         _this._gameOver = false;
+        _this._paused = false;
         _this.init(); //初始化
         return _this;
     }
@@ -55,13 +58,29 @@ var PlayPage = /** @class */ (function (_super) {
         this.initMatter();
         this.initWorld();
         this.onUpdate();
+        this._pauseBtn = this._view.getChild("PauseButton"); //开始按钮
+        this._pauseBtn.onClick(this, this.onPause);
+        //播放背景音乐
+        //背景音乐同时只能播放一个，
+        //如果在播放背景音乐时再次调用本方法，
+        //会先停止之前的背景音乐，再播放当前的背景音乐。
+        //也就是说,这个方法只能用于背景音乐
+        //Laya.SoundManager.musicVolume = BG_MUSIC_VOLUME;
+        //Laya.SoundManager.playMusic("res/wav/BG.wav", 0);
         Laya.timer.frameLoop(1, this, this.onHeartBeat); //心跳
     };
+    PlayPage.prototype.onComplete = function () {
+        console.log("播放完成");
+    };
     PlayPage.prototype.onClick = function (evt) {
+        if (this._paused)
+            return;
         if (this.isOver()) {
             console.warn("游戏已经结束，不能再次点击.");
             return; //游戏已经结束
         }
+        console.log("播放音效");
+        Laya.SoundManager.playSound("res/AK47.mp3", 0);
         ++this._clickCount;
         var angle = this._gun.angle;
         if (angle > 2 * Math.PI) {
@@ -69,12 +88,12 @@ var PlayPage = /** @class */ (function (_super) {
             angle -= (num * 2 * Math.PI);
         }
         var force = 0.08 * this._gun.mass;
-        var x0 = force * Math.sin(angle) / 12;
+        var x0 = force * Math.sin(angle);
         var y0 = force * Math.cos(angle);
         if (y0 < 0)
             y0 = 0;
         this.Matter.Body.applyForce(this._gun, this._gun.position, { x: x0, y: -y0 });
-        //this._bg.y += y0; //背景移动，仿佛枪在上移
+        //this._bg.y += (y0 * 10); //背景移动，仿佛枪在上移
         var rotateValue = Math.PI / 15;
         if (Math.PI < angle && angle < 2 * Math.PI)
             rotateValue *= -1;
@@ -84,7 +103,8 @@ var PlayPage = /** @class */ (function (_super) {
     };
     PlayPage.prototype.onUpdate = function () {
         this._ammoNum.text = this._bulletNum.toString();
-        //设置质量
+        this._coins.asTextField.text = this._coinNum.toString();
+        this._score.text = this._scoreNum.toString();
         for (var i = 0; i < this._ammoList.asList.numChildren; ++i) {
             var element = this._ammoList.asList._children[i];
             if (i < this._bulletNum) {
@@ -95,17 +115,46 @@ var PlayPage = /** @class */ (function (_super) {
             } //黑底
         }
     };
+    PlayPage.prototype.resetNum = function (score, bullet, coins) {
+        this._scoreNum = score;
+        this._bulletNum = bullet;
+        this._coinNum = coins;
+        this.onUpdate();
+    };
+    PlayPage.prototype.onPause = function () {
+        this._paused = !this._paused;
+        this._bg.onPause(this._paused);
+        console.log("暂停游戏:" + this._paused);
+        this._gun.isStatic = this._paused;
+        this._gun_right.isStatic = this._paused;
+        if (this._paused) {
+            this._view.visible = false;
+            this._gun.render.visible = false;
+            this._gun_right.render.visible = false;
+            this._pausePage = new PausePage(this._scoreNum, this._bulletNum, this._coinNum);
+            this._pausePage.zOrder = 1;
+            Laya.stage.addChild(this._pausePage);
+        }
+        else {
+            this._view.visible = true;
+            this._gun.render.visible = true;
+            //this._gun_right.render.visible = true;
+        }
+    };
+    PlayPage.prototype.onHide = function () {
+        this._gun.render.visible = false;
+        this._gun_right.render.visible = false;
+    };
     PlayPage.prototype.setScore = function (score) {
-        this._score.asTextField.text = score.toString();
+        this._scoreNum += score;
+        console.log("增加分数，当前分数数量:" + this._scoreNum);
     };
     PlayPage.prototype.gainCoin = function (count) {
         this._coinNum = this._coinNum + count;
-        this._coins.asTextField.text = this._coinNum.toString();
         console.log("增加金币，当前金币数量:" + this._coinNum);
     };
     PlayPage.prototype.gainBullet = function (count) {
         this._bulletNum = this._bulletNum + count;
-        this._ammoNum.asTextField.text = this._bulletNum.toString();
         console.log("增加金币，当前数量:" + this._bulletNum);
     };
     PlayPage.prototype.getHoster = function () {
@@ -122,7 +171,7 @@ var PlayPage = /** @class */ (function (_super) {
         this.LayaRender.run(render);
     };
     PlayPage.prototype.initWorld = function () {
-        this._gun = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 500, 92, 271, {
+        this._gun = this.Matter.Bodies.rectangle(200, 500, 92, 271, {
             isStatic: false,
             frictionAir: 0.03,
             //density: 0.68, //密度
@@ -147,7 +196,7 @@ var PlayPage = /** @class */ (function (_super) {
             },
             collisionFilter: { group: false }
         });
-        this._gun_right = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 500, 92, 271, {
+        this._gun_right = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 700, 92, 271, {
             isStatic: false,
             frictionAir: 0.03,
             //density: 0.68, //密度
@@ -173,12 +222,13 @@ var PlayPage = /** @class */ (function (_super) {
             collisionFilter: { group: false }
         });
         this.Matter.World.add(this._engine.world, [this._gun, this._gun_right]);
+        //this._gun.render.visible = false;
     };
     PlayPage.prototype.onGameOver = function () {
         console.log("结束游戏");
         this._view.visible = false; //隐藏当前界面
-        this._bg.visible = false;
-        var continuePage = new ContinuePage();
+        this._bg.visible = false; //隐藏背景图
+        var continuePage = new ContinuePage(this._scoreNum);
         Laya.stage.addChild(continuePage);
         this._gameOver = true;
         this._bg.onGameOver();
@@ -195,12 +245,19 @@ var PlayPage = /** @class */ (function (_super) {
         Laya.timer.clear(this, this.onHeartBeat); //删除定时器
         if (this._gun)
             this.Matter.World.remove(this._engine.world, this._gun); //删除枪
-        if (this._gun_left)
-            this.Matter.World.remove(this._engine.world, this._gun_left); //删除枪
         if (this._gun_right)
             this.Matter.World.remove(this._engine.world, this._gun_right); //删除枪
     };
     PlayPage.prototype.onHeartBeat = function () {
+        if (this._paused) {
+            if (!this._gun.render.visible)
+                return;
+            console.log("暂停游戏，隐藏枪支.");
+            this._gun.isStatic = false;
+            this._gun.render.visible = false;
+            this._gun_right.render.visible = false;
+            return;
+        }
         if (this.isOver()) {
             this.onGameOver();
             return;
@@ -215,6 +272,8 @@ var PlayPage = /** @class */ (function (_super) {
         }
         //console.log("心跳参数输出:" +  "this._gun.position:" + this._gun.position.x + " " + this._gun.position.y + " " 
         //        + " this._gun_right:" + this._gun_right.position.x + " " + this._gun_right.position.y);
+        //console.log("背景移动距离:" + this._bg.y);
+        this._scoreNum = this._bg.y;
         if (-Laya.stage.width + this._gun.width / 2 < gun_x && gun_x < this._gun.width / 2) {
             this._gun_right.position.y = gun_y;
             this._gun_right.angle = angle;
@@ -235,7 +294,14 @@ var PlayPage = /** @class */ (function (_super) {
             this._gun_right.angle = angle;
             this._gun_right.position.x = gun_x - Laya.stage.width;
             console.log("超过屏幕，调整位置，此时使用左侧枪");
-            this._gun_right.render.visible = true;
+            if (this._gun.position.x > 0 && this._gun.position.x < Laya.stage.width) {
+                this._gun_right.render.visible = false;
+            }
+            else {
+                this._gun_right.render.visible = true;
+            }
+            console.log("调试日志:" + "this._gun.position:" + this._gun.position.x + " " + this._gun.position.y + " "
+                + " this._gun_right:" + this._gun_right.position.x + " " + this._gun_right.position.y);
         }
         else if (gun_x > Laya.stage.width * 2 - this._gun.width / 2) {
             var position = this._gun_right.position;

@@ -101,8 +101,22 @@ class PlayPage extends Sprite
         this._pauseBtn = this._view.getChild("PauseButton"); //开始按钮
         this._pauseBtn.onClick(this, this.onPause);
 
+        //播放背景音乐
+        //背景音乐同时只能播放一个，
+        //如果在播放背景音乐时再次调用本方法，
+        //会先停止之前的背景音乐，再播放当前的背景音乐。
+        //也就是说,这个方法只能用于背景音乐
+        //Laya.SoundManager.musicVolume = BG_MUSIC_VOLUME;
+        //Laya.SoundManager.playMusic("res/wav/BG.wav", 0);
+
         Laya.timer.frameLoop(1, this, this.onHeartBeat); //心跳
     }
+
+    private onComplete(): void
+	{
+		console.log("播放完成");
+	}
+
     
     private onClick(evt: Event): void 
     {
@@ -114,6 +128,9 @@ class PlayPage extends Sprite
             return; //游戏已经结束
         }
 
+        console.log("播放音效");
+		Laya.SoundManager.playSound("res/AK47.mp3", 0);
+	
         ++this._clickCount;
       
         var angle = this._gun.angle;
@@ -125,7 +142,7 @@ class PlayPage extends Sprite
         }
 
         var force = 0.08 * this._gun.mass;
-        var x0 = force * Math.sin(angle) / 12;
+        var x0 = force * Math.sin(angle);
         var y0 = force * Math.cos(angle);
 
         if (y0 < 0) y0 = 0;
@@ -175,6 +192,9 @@ class PlayPage extends Sprite
         
         console.log("暂停游戏:" + this._paused);
 
+        this._gun.isStatic = this._paused;
+        this._gun_right.isStatic = this._paused;
+
         if (this._paused)
         {
             this._view.visible = false;
@@ -182,7 +202,7 @@ class PlayPage extends Sprite
             this._gun_right.render.visible = false;
 
             this._pausePage = new PausePage(this._scoreNum, this._bulletNum, this._coinNum);
-            //this._pausePage.zOrder = 1;
+            this._pausePage.zOrder = 1;
             Laya.stage.addChild(this._pausePage);
         }
         else
@@ -191,9 +211,12 @@ class PlayPage extends Sprite
             this._gun.render.visible = true;
             //this._gun_right.render.visible = true;
         }
+    }
 
-        this._gun.isStatic = this._paused;
-        this._gun_right.isStatic = this._paused;
+    public onHide(): void
+    {
+        this._gun.render.visible = false;
+        this._gun_right.render.visible = false;
     }
 
     private setScore(score: number)
@@ -235,7 +258,7 @@ class PlayPage extends Sprite
 		
     private initWorld(): void
     {
-        this._gun = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 500, 92, 271, { 
+        this._gun = this.Matter.Bodies.rectangle(200, 500, 92, 271, { 
             isStatic: false,
             frictionAir: 0.03,  //空气摩擦力
             //density: 0.68, //密度
@@ -262,7 +285,7 @@ class PlayPage extends Sprite
             collisionFilter: {group: false}
         });
 
-        this._gun_right = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 500, 92, 271, { 
+        this._gun_right = this.Matter.Bodies.rectangle(Laya.stage.width / 2, 700, 92, 271, { 
             isStatic: false,
             frictionAir: 0.03,  //空气摩擦力
             //density: 0.68, //密度
@@ -289,7 +312,11 @@ class PlayPage extends Sprite
             collisionFilter: {group: false}
         });
 
+
         this.Matter.World.add(this._engine.world, [ this._gun, this._gun_right ]);
+
+        //this._gun.render.visible = false;
+        
     }
 
     private onGameOver(): void
@@ -322,7 +349,6 @@ class PlayPage extends Sprite
         Laya.timer.clear(this, this.onHeartBeat); //删除定时器
 
         if (this._gun) this.Matter.World.remove(this._engine.world, this._gun); //删除枪
-        //if (this._gun_left) this.Matter.World.remove(this._engine.world, this._gun_left); //删除枪
         if (this._gun_right) this.Matter.World.remove(this._engine.world, this._gun_right); //删除枪
     }
     
@@ -330,8 +356,10 @@ class PlayPage extends Sprite
     {
         if (this._paused) 
         {
-            console.log("暂停游戏，隐藏枪支.");
+            if (!this._gun.render.visible) return;
 
+            console.log("暂停游戏，隐藏枪支.");
+            this._gun.isStatic = false;
             this._gun.render.visible = false;
             this._gun_right.render.visible = false;
             return;

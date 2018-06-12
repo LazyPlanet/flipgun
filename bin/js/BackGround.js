@@ -41,7 +41,11 @@ var BackGround = /** @class */ (function (_super) {
         this.addItem("bg2");
         Laya.timer.frameLoop(this.BG_FRAME_DELAY, this, this.onLoop);
     };
+    BackGround.prototype.onPause = function (pause) {
+        this.IS_PAUSE = pause;
+    };
     BackGround.prototype.onGameOver = function () {
+        this.IS_OVER = true;
         Laya.timer.clear(this, this.onLoop);
     };
     BackGround.prototype.onLoop = function () {

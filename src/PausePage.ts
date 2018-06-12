@@ -87,6 +87,8 @@ class PausePage extends Laya.Sprite
             if (i < this._bulletNum) { element.getController("Empty").selectedIndex = 0; } //白底
             else { element.getController("Empty").selectedIndex = 1; } //黑底
         }
+
+        _gamePage._mainPage._playPage.onHide();
     }
 
     private onPlay(evt: Event): void 
